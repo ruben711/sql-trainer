@@ -7,6 +7,7 @@ const tabs = [
   { href: "/exercises", label: "Oefeningen" },
   { href: "/playground", label: "Playground" },
   { href: "/exam", label: "Examensimulatie" },
+  { href: "/leaderboard", label: "Leaderboard" },
   { href: "/schema", label: "Schema" },
 ];
 

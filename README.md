@@ -218,6 +218,31 @@ A: €0 op Vercel Hobby. Voor wat vrienden gebruik je 0,1% van de free-tier-limi
 
 ---
 
+## 🏆 Leaderboard (optioneel)
+
+Gedeelde ranking via **Upstash Redis** (gratis tier, edge-compatibel).
+
+**Setup:**
+1. Account op [console.upstash.com](https://console.upstash.com) — gratis met GitHub
+2. **Create Database** → naam vrij, region `eu-west-1` (Vercel default), TLS aan
+3. Op de database-pagina → scroll naar **REST API** → kopieer:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+4. Zet in Vercel → Settings → Environment Variables (alle 3 environments)
+5. Redeploy
+
+**Alternatief:** Vercel-dashboard → Storage → Create KV → automatisch gekoppeld (zelfde Upstash onder de motorkap).
+
+**Hoe werkt het:**
+- Eerste keer dat iemand op `/leaderboard` klikt: modal vraagt om een naam (suggestie: `User1234`)
+- Bestaande XP/opgeloste oefeningen worden meteen geüpload
+- Na elk opgelost oefening + na elk examen → auto-sync
+- Tabblad per modus (Examen DB / Algemene SQL), eigen rij gehighlight
+- Server-side rate-limit: 1 submit / 5s / gebruiker
+- Storage-cap: 500 spelers
+
+**Zonder Upstash:** leaderboard-pagina toont een nette config-melding; app werkt verder normaal.
+
 ## 📈 Discord-logging (optioneel)
 
 De app kan bezoek + oefenactiviteit naar een private Discord-channel sturen.

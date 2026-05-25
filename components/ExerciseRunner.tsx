@@ -8,6 +8,7 @@ import { useProgress } from "@/lib/store";
 import { useMode } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
 import { track } from "@/lib/logger";
+import { syncIfJoined } from "@/lib/leaderboardSync";
 import type { Exercise } from "@/lib/exercises";
 
 const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
@@ -51,7 +52,11 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
       difficulty: exercise.difficulty, chapter: exercise.chapter,
       query: sql.slice(0, 500),
     });
-    if (grading.correct) onSolved?.();
+    if (grading.correct) {
+      onSolved?.();
+      // Best-effort: synchroon naar leaderboard (alleen als gebruiker meedoet)
+      setTimeout(() => syncIfJoined(), 200);
+    }
     setBusy(false);
   }
 

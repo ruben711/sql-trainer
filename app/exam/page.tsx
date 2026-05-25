@@ -8,6 +8,7 @@ import { runQuery, QueryResult } from "@/lib/db";
 import { useMode, MODES } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
 import { track } from "@/lib/logger";
+import { syncIfJoined } from "@/lib/leaderboardSync";
 import Link from "next/link";
 
 const DEFAULT_MINUTES = 30;
@@ -83,6 +84,7 @@ export default function ExamPage() {
     track("exam_completed", {
       mode, total: questions.length, correct, percent: Math.round((correct / Math.max(questions.length, 1)) * 100),
     });
+    syncIfJoined();
   }
   const score = useMemo(() => answers.filter((a) => a.correct).length, [answers]);
 
