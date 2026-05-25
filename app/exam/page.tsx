@@ -9,6 +9,8 @@ import { useMode, MODES } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
 import { track } from "@/lib/logger";
 import { syncIfJoined } from "@/lib/leaderboardSync";
+import { HighlightedSql } from "@/lib/sqlHighlight";
+import { formatSql } from "@/lib/sqlFormat";
 import Link from "next/link";
 
 const DEFAULT_MINUTES = 30;
@@ -150,7 +152,7 @@ export default function ExamPage() {
                     <td className="font-mono">{q.id}</td>
                     <td className="str">{q.title}</td>
                     <td><span className={`diff-${q.difficulty}`}>{diffLabel[q.difficulty]}</span></td>
-                    <td><code className="font-mono text-2xs text-fg-muted whitespace-pre-wrap">{q.solution}</code></td>
+                    <td className="text-2xs"><HighlightedSql sql={formatSql(q.solution)} /></td>
                   </tr>
                 );
               })}

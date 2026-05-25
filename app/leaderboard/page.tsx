@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useIdentity } from "@/lib/identity";
 import { useProgress } from "@/lib/store";
 import { useMode, MODES } from "@/lib/modes";
+import { useAdmin } from "@/lib/adminClient";
 import clsx from "clsx";
 
 type ModeKey = "exam" | "general";
@@ -12,6 +13,7 @@ type Entry = {
   exam: { xp: number; solved: number };
   general: { xp: number; solved: number };
   updatedAt: number;
+  admin?: boolean;
 };
 
 function levelOf(xp: number) {
@@ -24,7 +26,8 @@ export default function LeaderboardPage() {
   const mode = useMode((s) => s.mode);
   const byMode = useProgress((s) => s.byMode);
   const id = useIdentity();
-  useEffect(() => id.ensure(), []);
+  const admin = useAdmin();
+  useEffect(() => { id.ensure(); admin.check(); }, []);
 
   const [tab, setTab] = useState<ModeKey>(mode);
   const [entries, setEntries] = useState<Entry[] | null>(null);
@@ -198,6 +201,7 @@ export default function LeaderboardPage() {
                 <th className="text-right">Niveau</th>
                 <th className="text-right">Opgelost</th>
                 <th className="text-right">Laatst actief</th>
+                {admin.isAdmin && <th>Admin</th>}
               </tr>
             </thead>
             <tbody>
@@ -211,12 +215,46 @@ export default function LeaderboardPage() {
                       {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
                     </td>
                     <td className={clsx("str", me && "font-bold")}>
-                      {e.name}{me && <span className="ml-2 chip">jij</span>}
+                      <span className="inline-flex items-center gap-1.5">
+                        {e.name}
+                        {e.admin && <span className="admin-tag">👑 ADMIN</span>}
+                        {me && <span className="chip">jij</span>}
+                      </span>
                     </td>
                     <td className="num">{xp}</td>
                     <td className="num">{levelOf(xp)}</td>
                     <td className="num">{solved}</td>
                     <td className="text-right text-fg-dim">{new Date(e.updatedAt).toLocaleString("nl-BE")}</td>
+                    {admin.isAdmin && (
+                      <td>
+                        <span className="flex gap-1">
+                          <button
+                            className="btn-sm btn"
+                            title="Naam wijzigen"
+                            onClick={async () => {
+                              const n = prompt("Nieuwe naam:", e.name);
+                              if (!n) return;
+                              await fetch("/api/leaderboard", {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ uid: e.uid, name: n }),
+                              });
+                              fetchBoard(tab);
+                            }}
+                          >✎</button>
+                          <button
+                            className="btn-sm btn"
+                            style={{ borderColor: "rgb(var(--err) / 0.4)", color: "rgb(var(--err))" }}
+                            title="Verwijderen"
+                            onClick={async () => {
+                              if (!confirm(`Verwijder "${e.name}"?`)) return;
+                              await fetch(`/api/leaderboard?uid=${encodeURIComponent(e.uid)}`, { method: "DELETE" });
+                              fetchBoard(tab);
+                            }}
+                          >🗑</button>
+                        </span>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

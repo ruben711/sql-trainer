@@ -231,6 +231,22 @@ body {
 .chip-warn { @apply chip text-warn; border-color: rgb(var(--warn) / 0.4); background: rgb(var(--warn) / 0.08); }
 .chip-err { @apply chip text-err; border-color: rgb(var(--err) / 0.4); background: rgb(var(--err) / 0.08); }
 
+/* Admin tag — opvallend goud/glow */
+.admin-tag {
+  @apply inline-flex items-center gap-1 px-1.5 h-5 text-2xs font-mono font-bold uppercase tracking-wider rounded-sm border;
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.55);
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.35), rgba(251, 191, 36, 0.18));
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.2), 0 0 8px rgba(251, 191, 36, 0.25);
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.45);
+}
+.light .admin-tag {
+  color: #92400e;
+  border-color: rgba(180, 83, 9, 0.5);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(252, 211, 77, 0.5));
+  text-shadow: none;
+}
+
 /* Difficulty pills */
 .diff {
   @apply inline-flex items-center gap-1 px-1.5 h-5 text-2xs font-mono font-semibold uppercase rounded-sm border;

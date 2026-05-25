@@ -9,6 +9,9 @@ import { useMode } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
 import { track } from "@/lib/logger";
 import { syncIfJoined } from "@/lib/leaderboardSync";
+import SolutionModal from "@/components/SolutionModal";
+import { HighlightedSql } from "@/lib/sqlHighlight";
+import { formatSql } from "@/lib/sqlFormat";
 import type { Exercise } from "@/lib/exercises";
 
 const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
@@ -22,7 +25,6 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
   const [grading, setGrading] = useState<GradingResult | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [showSolution, setShowSolution] = useState(false);
-  const [revealedHints, setRevealedHints] = useState(0);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -31,7 +33,6 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setGrading(null);
     setAttempts(0);
     setShowSolution(false);
-    setRevealedHints(0);
     setHighlight(exercise.relatedTables ?? []);
     track("exercise_view", { id: exercise.id, mode, chapter: exercise.chapter, difficulty: exercise.difficulty });
     return () => setHighlight([]);
@@ -115,17 +116,13 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
             <button className="btn" onClick={runOnly} disabled={busy}>▶ Test uitvoeren</button>
             <div className="divider-v" />
             <button
-              className="btn-ghost"
-              disabled={!exercise.hints?.length || revealedHints >= (exercise.hints?.length ?? 0)}
-              onClick={() => setRevealedHints((n) => n + 1)}
+              className="btn-ghost text-warn"
+              onClick={() => setShowSolution(true)}
+              title={attempts < 3 ? `Beschikbaar na ${3 - attempts} poging(en)` : "Open modeloplossing"}
+              disabled={attempts < 3}
             >
-              💡 Hint ({revealedHints}/{exercise.hints?.length ?? 0})
+              💡 Modeloplossing {attempts < 3 ? `(${3 - attempts} pogingen te gaan)` : ""}
             </button>
-            {attempts >= 3 && !showSolution && (
-              <button className="btn-ghost text-warn" onClick={() => setShowSolution(true)}>
-                Toon oplossing
-              </button>
-            )}
             <span className="ml-auto text-2xs text-fg-dim">{busy ? "Bezig…" : "Klaar"}</span>
           </div>
         </div>
@@ -152,22 +149,7 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
               </div>
             </div>
           )}
-          {revealedHints > 0 && exercise.hints && (
-            <div className="border-b border-line">
-              <div className="feedback-warn">
-                <div className="font-semibold mb-1">Hints</div>
-                <ul className="list-disc list-inside text-xs space-y-0.5">
-                  {exercise.hints.slice(0, revealedHints).map((h, i) => <li key={i}>{h}</li>)}
-                </ul>
-              </div>
-            </div>
-          )}
-          {showSolution && (
-            <div className="border-b border-line">
-              <div className="pane-header"><span>Modeloplossing</span></div>
-              <pre className="code m-0 border-0 whitespace-pre-wrap">{exercise.solution}</pre>
-            </div>
-          )}
+          {/* Modal-trigger: showSolution wordt nu via SolutionModal getoond, niet inline */}
           <div className="pane-header">
             <span>Resultaat</span>
             <span className="text-fg-dim normal-case font-normal">
@@ -179,6 +161,14 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
           </div>
         </div>
       </div>
+
+      <SolutionModal
+        open={showSolution}
+        rawSolution={exercise.solution}
+        currentQuery={sql}
+        onClose={() => setShowSolution(false)}
+        onApply={(formatted) => setSql(formatted)}
+      />
     </div>
   );
 }
