@@ -1,0 +1,312 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================================================
+   THEME TOKENS  —  RGB triples (zonder rgb(...) wrapper, voor Tailwind /alpha)
+   ======================================================================== */
+
+/* DARK (default) — graphite/charcoal IDE */
+:root, .dark {
+  color-scheme: dark;
+
+  --canvas:    10 13 18;       /* app background */
+  --panel:     15 19 26;       /* main panel/sidebar */
+  --pane:      20 25 34;       /* inner pane */
+  --sunken:    8 11 16;        /* code/input bg */
+  --elevated:  26 32 48;       /* dropdown, popover */
+  --hover:     31 38 54;
+  --line:      42 49 69;       /* borders */
+  --line-strong: 58 66 88;
+
+  --fg:        216 222 233;
+  --fg-muted:  138 148 178;
+  --fg-dim:    96 106 130;
+  --fg-faint:  62 70 89;
+
+  --brand:     59 130 246;     /* IDE blauw */
+  --brand-bg:  30 58 138;
+
+  --mode-exam:      99 102 241;       /* indigo/violet */
+  --mode-exam-bg:   49 46 129;
+  --mode-general:   16 185 129;       /* emerald */
+  --mode-general-bg: 6 78 59;
+
+  --ok:        34 197 94;
+  --warn:      234 179 8;
+  --err:       248 113 113;
+
+  --diff-easy:   52 211 153;
+  --diff-medium: 251 191 36;
+  --diff-hard:   248 113 113;
+
+  /* SQL syntax (alleen voor Monaco custom theme, niet via Tailwind) */
+  --sql-keyword: #569cd6;
+  --sql-fn:      #dcdcaa;
+  --sql-string:  #ce9178;
+  --sql-number:  #b5cea8;
+  --sql-comment: #6a9955;
+  --sql-type:    #4ec9b0;
+}
+
+/* LIGHT — JetBrains / VS Code light */
+.light {
+  color-scheme: light;
+
+  --canvas:    246 247 250;
+  --panel:     255 255 255;
+  --pane:      250 251 253;
+  --sunken:    243 244 247;
+  --elevated:  255 255 255;
+  --hover:     236 239 244;
+  --line:      215 220 230;
+  --line-strong: 188 196 210;
+
+  --fg:        35 42 56;
+  --fg-muted:  86 95 115;
+  --fg-dim:    121 130 150;
+  --fg-faint:  170 178 195;
+
+  --brand:     37 99 235;
+  --brand-bg:  219 234 254;
+
+  --mode-exam:      79 70 229;
+  --mode-exam-bg:   224 222 252;
+  --mode-general:   5 150 105;
+  --mode-general-bg: 209 250 229;
+
+  --ok:        21 128 61;
+  --warn:      161 98 7;
+  --err:       185 28 28;
+
+  --diff-easy:   16 122 87;
+  --diff-medium: 161 98 7;
+  --diff-hard:   185 28 28;
+
+  --sql-keyword: #0000ff;
+  --sql-fn:      #795e26;
+  --sql-string:  #a31515;
+  --sql-number:  #098658;
+  --sql-comment: #008000;
+  --sql-type:    #267f99;
+}
+
+/* ========================================================================
+   BASE
+   ======================================================================== */
+html, body, #__next { height: 100%; }
+body {
+  @apply bg-canvas text-fg font-sans antialiased;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* Scrollbars */
+* { scrollbar-color: rgb(var(--line-strong)) transparent; scrollbar-width: thin; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(var(--line-strong)); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--fg-dim)); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* ========================================================================
+   PANEL SYSTEM
+   ======================================================================== */
+.pane {
+  @apply bg-panel border border-line;
+}
+.pane-header {
+  @apply flex items-center justify-between px-3 h-8 border-b border-line bg-pane text-2xs uppercase tracking-wider text-fg-muted font-semibold select-none;
+}
+.pane-body { @apply p-3; }
+.pane-section { @apply border-b border-line last:border-b-0; }
+
+.toolbar {
+  @apply flex items-center gap-1 px-2 h-9 border-b border-line bg-pane;
+}
+
+/* ========================================================================
+   STATUS BAR  — gekleurd per mode
+   ======================================================================== */
+.statusbar {
+  @apply flex items-center gap-3 px-3 h-6 border-t border-line text-2xs;
+  background: rgb(var(--statusbar-bg, var(--brand-bg)));
+  color: rgb(var(--statusbar-fg, 255 255 255) / 0.92);
+}
+.statusbar .seg { @apply flex items-center gap-1.5; }
+.statusbar .seg + .seg::before {
+  content: "";
+  @apply h-3 w-px bg-white/20 mr-3;
+}
+
+/* Mode-aware status bar (Tailwind kan dit niet conditionally, dus via data-attr) */
+[data-mode="exam"] .statusbar {
+  background: rgb(var(--mode-exam-bg));
+  color: rgb(255 255 255 / 0.95);
+}
+[data-mode="general"] .statusbar {
+  background: rgb(var(--mode-general-bg));
+  color: rgb(255 255 255 / 0.95);
+}
+.light[data-mode="exam"] .statusbar { color: rgb(var(--mode-exam)); }
+.light[data-mode="general"] .statusbar { color: rgb(var(--mode-general)); }
+.light .statusbar .seg + .seg::before { @apply bg-line; }
+
+/* Top accent strip under header — mode color */
+.mode-strip {
+  height: 2px;
+  background: rgb(var(--line));
+}
+[data-mode="exam"] .mode-strip { background: linear-gradient(90deg, rgb(var(--mode-exam)) 0%, rgb(var(--mode-exam) / 0.3) 100%); }
+[data-mode="general"] .mode-strip { background: linear-gradient(90deg, rgb(var(--mode-general)) 0%, rgb(var(--mode-general) / 0.3) 100%); }
+
+/* ========================================================================
+   NAV TABS
+   ======================================================================== */
+.nav-tab {
+  @apply relative h-9 px-3 inline-flex items-center gap-2 text-xs font-medium text-fg-muted hover:text-fg hover:bg-hover transition-colors border-r border-line;
+}
+.nav-tab.active {
+  @apply text-fg bg-canvas;
+}
+.nav-tab.active::after {
+  content: "";
+  @apply absolute left-0 right-0 bottom-0 h-0.5 bg-brand;
+}
+
+/* ========================================================================
+   MODE SWITCHER (segmented control)
+   ======================================================================== */
+.mode-switch {
+  @apply inline-flex h-7 border border-line rounded-sm overflow-hidden bg-pane;
+}
+.mode-switch button {
+  @apply px-3 h-full inline-flex items-center gap-1.5 text-xs font-medium text-fg-muted hover:text-fg hover:bg-hover transition-colors;
+}
+.mode-switch button + button { @apply border-l border-line; }
+.mode-switch button.active[data-m="exam"] {
+  background: rgb(var(--mode-exam) / 0.15);
+  color: rgb(var(--mode-exam));
+  box-shadow: inset 0 -2px 0 0 rgb(var(--mode-exam));
+}
+.mode-switch button.active[data-m="general"] {
+  background: rgb(var(--mode-general) / 0.15);
+  color: rgb(var(--mode-general));
+  box-shadow: inset 0 -2px 0 0 rgb(var(--mode-general));
+}
+
+/* ========================================================================
+   BUTTONS
+   ======================================================================== */
+.btn {
+  @apply inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium rounded-sm border border-line bg-pane text-fg hover:bg-hover hover:border-line-strong transition-colors;
+}
+.btn-primary {
+  @apply inline-flex items-center gap-1.5 h-7 px-3 text-xs font-medium rounded-sm border text-white transition-colors;
+  background: rgb(var(--brand));
+  border-color: rgb(var(--brand));
+}
+.btn-primary:hover {
+  background: rgb(var(--brand) / 0.85);
+}
+.btn-ghost {
+  @apply inline-flex items-center gap-1.5 h-7 px-2 text-xs text-fg-muted hover:text-fg hover:bg-hover rounded-sm transition-colors;
+}
+.btn-sm { @apply h-6 px-2 text-2xs; }
+
+/* ========================================================================
+   INPUTS
+   ======================================================================== */
+.input {
+  @apply w-full h-7 px-2 text-xs rounded-sm bg-sunken border border-line text-fg placeholder:text-fg-faint focus:border-brand focus:outline-none;
+}
+
+/* ========================================================================
+   BADGES / CHIPS
+   ======================================================================== */
+.chip {
+  @apply inline-flex items-center gap-1 px-1.5 h-5 text-2xs font-medium rounded-sm border border-line bg-pane text-fg-muted;
+}
+.chip-ok { @apply chip text-ok; border-color: rgb(var(--ok) / 0.4); background: rgb(var(--ok) / 0.08); }
+.chip-warn { @apply chip text-warn; border-color: rgb(var(--warn) / 0.4); background: rgb(var(--warn) / 0.08); }
+.chip-err { @apply chip text-err; border-color: rgb(var(--err) / 0.4); background: rgb(var(--err) / 0.08); }
+
+/* Difficulty pills */
+.diff {
+  @apply inline-flex items-center gap-1 px-1.5 h-5 text-2xs font-mono font-semibold uppercase rounded-sm border;
+}
+.diff-easy   { @apply diff; color: rgb(var(--diff-easy));   border-color: rgb(var(--diff-easy) / 0.45);   background: rgb(var(--diff-easy) / 0.10); }
+.diff-medium { @apply diff; color: rgb(var(--diff-medium)); border-color: rgb(var(--diff-medium) / 0.45); background: rgb(var(--diff-medium) / 0.10); }
+.diff-hard   { @apply diff; color: rgb(var(--diff-hard));   border-color: rgb(var(--diff-hard) / 0.45);   background: rgb(var(--diff-hard) / 0.10); }
+
+.diff-dot   { @apply inline-block w-1.5 h-1.5 rounded-full; }
+.diff-dot.easy   { background: rgb(var(--diff-easy)); }
+.diff-dot.medium { background: rgb(var(--diff-medium)); }
+.diff-dot.hard   { background: rgb(var(--diff-hard)); }
+
+/* ========================================================================
+   TABS (query tabs in playground)
+   ======================================================================== */
+.tabbar { @apply flex border-b border-line bg-pane; }
+.tab {
+  @apply px-3 h-9 flex items-center gap-2 text-xs text-fg-muted border-r border-line hover:text-fg hover:bg-hover cursor-pointer transition-colors;
+}
+.tab-active {
+  @apply text-fg bg-canvas;
+  box-shadow: inset 0 2px 0 0 rgb(var(--brand));
+}
+
+/* ========================================================================
+   RESULT TABLE (DataGrip-style)
+   ======================================================================== */
+.table-wrap { @apply overflow-auto border border-line bg-sunken; }
+table.result { @apply w-full text-2xs font-mono; }
+table.result thead th {
+  @apply sticky top-0 z-10 bg-pane text-left font-semibold text-fg px-2 py-1.5 border-b border-line border-r border-r-line whitespace-nowrap;
+}
+table.result tbody td {
+  @apply px-2 py-1 border-b border-line/60 border-r border-r-line/60 align-top whitespace-nowrap text-fg;
+}
+table.result tbody tr:nth-child(even) td { background: rgb(var(--pane) / 0.4); }
+table.result tbody tr:hover td { background: rgb(var(--brand) / 0.06); }
+table.result td.null { @apply text-fg-dim italic; }
+table.result td.num { color: rgb(var(--sql-number)); @apply text-right; }
+table.result td.str { color: rgb(var(--sql-string)); }
+
+/* ========================================================================
+   FEEDBACK BLOCKS
+   ======================================================================== */
+.feedback-ok   { @apply text-sm px-3 py-2 border-l-2; color: rgb(var(--ok));   border-color: rgb(var(--ok)); background: rgb(var(--ok)   / 0.07); }
+.feedback-err  { @apply text-sm px-3 py-2 border-l-2; color: rgb(var(--err));  border-color: rgb(var(--err)); background: rgb(var(--err)  / 0.07); }
+.feedback-warn { @apply text-sm px-3 py-2 border-l-2; color: rgb(var(--warn)); border-color: rgb(var(--warn)); background: rgb(var(--warn) / 0.07); }
+
+/* ========================================================================
+   DATABASE EXPLORER TREE
+   ======================================================================== */
+.tree-item {
+  @apply flex items-center gap-1.5 px-2 h-6 text-xs cursor-pointer hover:bg-hover select-none;
+}
+.tree-item.active {
+  background: rgb(var(--brand) / 0.13);
+  color: rgb(var(--brand));
+}
+.tree-item .icon { @apply w-3.5 inline-flex justify-center text-fg-dim; }
+.tree-col {
+  @apply flex items-center gap-2 pl-6 h-5 text-2xs font-mono text-fg-muted hover:bg-hover;
+}
+.tree-col .col-type { @apply ml-auto text-fg-dim text-2xs italic; }
+
+/* ========================================================================
+   MISC
+   ======================================================================== */
+.kbd {
+  @apply inline-block px-1 py-px text-[10px] leading-none border bg-pane text-fg-muted font-mono rounded-sm;
+  border-color: rgb(var(--line-strong));
+}
+pre.code, .code {
+  @apply font-mono text-2xs bg-sunken border border-line p-2 text-fg overflow-auto;
+}
+a.link { color: rgb(var(--brand)); }
+a.link:hover { text-decoration: underline; }
+.divider-v { @apply w-px self-stretch bg-line mx-1; }
+.title-bar { @apply h-8 border-b border-line bg-pane flex items-center px-3 text-2xs uppercase tracking-wider text-fg-muted; }

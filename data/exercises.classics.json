@@ -1,0 +1,183 @@
+[
+  {
+    "id": "c-01",
+    "chapter": "Basics",
+    "title": "All products",
+    "difficulty": "easy",
+    "tags": ["select"],
+    "prompt": "Return all columns from the `products` table.",
+    "solution": "SELECT * FROM products;",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-02",
+    "chapter": "Basics",
+    "title": "Product names only",
+    "difficulty": "easy",
+    "tags": ["projection"],
+    "prompt": "Return only the `name` column from `products`.",
+    "solution": "SELECT name FROM products;",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-03",
+    "chapter": "Basics",
+    "title": "Distinct countries",
+    "difficulty": "easy",
+    "tags": ["distinct"],
+    "prompt": "Return all distinct customer countries.",
+    "solution": "SELECT DISTINCT country FROM customers;",
+    "relatedTables": ["customers"]
+  },
+  {
+    "id": "c-04",
+    "chapter": "WHERE",
+    "title": "Cheap products",
+    "difficulty": "easy",
+    "tags": ["where"],
+    "prompt": "Return name and price of products that cost less than 50.",
+    "solution": "SELECT name, price FROM products WHERE price < 50;",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-05",
+    "chapter": "WHERE",
+    "title": "Belgian customers",
+    "difficulty": "easy",
+    "tags": ["where"],
+    "prompt": "Return name and city of customers from country 'BE'.",
+    "solution": "SELECT name, city FROM customers WHERE country = 'BE';",
+    "relatedTables": ["customers"]
+  },
+  {
+    "id": "c-06",
+    "chapter": "WHERE",
+    "title": "Missing email",
+    "difficulty": "easy",
+    "tags": ["null"],
+    "prompt": "Return names of customers with no email address.",
+    "solution": "SELECT name FROM customers WHERE email IS NULL;",
+    "relatedTables": ["customers"]
+  },
+  {
+    "id": "c-07",
+    "chapter": "ORDER BY",
+    "title": "Most expensive first",
+    "difficulty": "easy",
+    "tags": ["order-by"],
+    "prompt": "Return name and price of all products, most expensive first.",
+    "solution": "SELECT name, price FROM products ORDER BY price DESC;",
+    "orderMatters": true,
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-08",
+    "chapter": "Joins",
+    "title": "Order + customer",
+    "difficulty": "medium",
+    "tags": ["join"],
+    "prompt": "Return order id, order_date, and the customer name for every order.",
+    "solution": "SELECT o.id, o.order_date, c.name FROM orders o JOIN customers c ON c.id = o.customer_id;",
+    "relatedTables": ["orders", "customers"]
+  },
+  {
+    "id": "c-09",
+    "chapter": "Joins",
+    "title": "Products + category",
+    "difficulty": "medium",
+    "tags": ["join"],
+    "prompt": "Return product name and the category name for each product.",
+    "solution": "SELECT p.name AS product, c.name AS category FROM products p JOIN categories c ON c.id = p.category_id;",
+    "relatedTables": ["products", "categories"]
+  },
+  {
+    "id": "c-10",
+    "chapter": "Joins",
+    "title": "Customers without orders",
+    "difficulty": "hard",
+    "tags": ["left-join", "anti"],
+    "prompt": "Return the names of customers who have never placed an order.",
+    "solution": "SELECT c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL;",
+    "relatedTables": ["customers", "orders"]
+  },
+  {
+    "id": "c-11",
+    "chapter": "Aggregation",
+    "title": "Number of customers",
+    "difficulty": "easy",
+    "tags": ["count"],
+    "prompt": "Return the total number of customers under alias `total`.",
+    "solution": "SELECT COUNT(*) AS total FROM customers;",
+    "relatedTables": ["customers"]
+  },
+  {
+    "id": "c-12",
+    "chapter": "Aggregation",
+    "title": "Orders per customer",
+    "difficulty": "medium",
+    "tags": ["group-by"],
+    "prompt": "Return customer_id and order count (alias `n`) per customer.",
+    "solution": "SELECT customer_id, COUNT(*) AS n FROM orders GROUP BY customer_id;",
+    "relatedTables": ["orders"]
+  },
+  {
+    "id": "c-13",
+    "chapter": "Aggregation",
+    "title": "Average price per category",
+    "difficulty": "medium",
+    "tags": ["group-by", "avg"],
+    "prompt": "Return category_id and average product price (alias `avg_price`) per category.",
+    "solution": "SELECT category_id, AVG(price) AS avg_price FROM products GROUP BY category_id;",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-14",
+    "chapter": "Aggregation",
+    "title": "HAVING",
+    "difficulty": "medium",
+    "tags": ["having"],
+    "prompt": "Return countries that have more than 1 customer, with column `country` and `n`.",
+    "solution": "SELECT country, COUNT(*) AS n FROM customers GROUP BY country HAVING COUNT(*) > 1;",
+    "relatedTables": ["customers"]
+  },
+  {
+    "id": "c-15",
+    "chapter": "Subqueries",
+    "title": "Above-average price",
+    "difficulty": "medium",
+    "tags": ["subquery"],
+    "prompt": "Return products whose price is above the overall average price.",
+    "solution": "SELECT name, price FROM products WHERE price > (SELECT AVG(price) FROM products);",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-16",
+    "chapter": "Subqueries",
+    "title": "Self-join: manager",
+    "difficulty": "hard",
+    "tags": ["self-join"],
+    "prompt": "Return employee name and their manager's name (column `employee`, `manager`).",
+    "solution": "SELECT e.name AS employee, m.name AS manager FROM employees e JOIN employees m ON m.id = e.manager_id;",
+    "relatedTables": ["employees"]
+  },
+  {
+    "id": "c-17",
+    "chapter": "CASE",
+    "title": "Price bucket",
+    "difficulty": "medium",
+    "tags": ["case"],
+    "prompt": "Return product name and a `bucket` column: 'cheap' (<30), 'mid' (30-100), 'expensive' (>100).",
+    "solution": "SELECT name, CASE WHEN price < 30 THEN 'cheap' WHEN price <= 100 THEN 'mid' ELSE 'expensive' END AS bucket FROM products;",
+    "relatedTables": ["products"]
+  },
+  {
+    "id": "c-18",
+    "chapter": "Set operators",
+    "title": "UNION cities",
+    "difficulty": "medium",
+    "tags": ["union"],
+    "prompt": "Return distinct cities (single column `city`) where customers live (no duplicates).",
+    "solution": "SELECT city FROM customers UNION SELECT city FROM customers;",
+    "relatedTables": ["customers"]
+  }
+]
