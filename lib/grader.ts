@@ -1,5 +1,11 @@
-import { runQuery, QueryResult } from "./db";
+import { runQuery, resetDatabase, QueryResult } from "./db";
 import type { Mode } from "./modes";
+
+/** Detecteert of de query state in de DB verandert (DDL of DML).
+ *  Voor zulke queries moeten we de DB resetten tussen student & model runs. */
+function hasSideEffects(sql: string): boolean {
+  return /\b(CREATE|DROP|ALTER|INSERT|UPDATE|DELETE|REPLACE|TRUNCATE)\b/i.test(sql);
+}
 
 export type GradingResult = {
   correct: boolean;
@@ -98,8 +104,11 @@ function hintsForRows(student: QueryResult, expected: QueryResult): string[] {
 
 function hintFromError(err: string): string[] {
   const e = err.toLowerCase();
+  if (e.includes("already exists")) return [
+    "Een tabel of view met die naam bestaat al — gebruik `DROP VIEW IF EXISTS naam;` ervóór, of klik ↺ Reset database in de Playground.",
+  ];
   if (e.includes("no such column")) return ["Tikfout in een kolomnaam? Of een tabel die je vergat te joinen?"];
-  if (e.includes("no such table")) return ["Tabel niet gevonden — let op hoofdletters."];
+  if (e.includes("no such table")) return ["Tabel of view niet gevonden — let op hoofdletters."];
   if (e.includes("syntax error")) return ["Syntaxfout — let op puntkomma's, haakjes en SQL-keywords."];
   if (e.includes("ambiguous")) return ["Kolomnaam komt in meerdere tabellen voor — qualificeer met `tabel.kolom`."];
   if (e.includes("group by")) return ["Bij `GROUP BY`: alle niet-aggregaten moeten in de GROUP BY staan."];
@@ -112,7 +121,30 @@ export async function gradeQuery(
   expectedSql: string,
   opts: { orderMatters?: boolean; strictColumnNames?: boolean } = {}
 ): Promise<{ grading: GradingResult; student: QueryResult; expected: QueryResult }> {
-  const [student, expected] = await Promise.all([runQuery(mode, studentSql), runQuery(mode, expectedSql)]);
+  const needsIsolation = hasSideEffects(studentSql) || hasSideEffects(expectedSql);
+
+  let student: QueryResult;
+  let expected: QueryResult;
+
+  if (needsIsolation) {
+    // DDL/DML in spel — sequentieel uitvoeren met DB-reset ertussen,
+    // zodat student en model elkaar niet beïnvloeden.
+    await resetDatabase(mode);
+    student = await runQuery(mode, studentSql);
+
+    await resetDatabase(mode);
+    expected = await runQuery(mode, expectedSql);
+
+    // Achteraf opruimen zodat volgende oefening / playground proper start
+    await resetDatabase(mode);
+  } else {
+    // Pure SELECT — parallel mag, idempotent
+    [student, expected] = await Promise.all([
+      runQuery(mode, studentSql),
+      runQuery(mode, expectedSql),
+    ]);
+  }
+
   const grading = compareResults(student, expected, opts);
   return { grading, student, expected };
 }

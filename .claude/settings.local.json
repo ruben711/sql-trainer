@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell($base = \"C:\\\\Users\\\\ruben\\\\SQL\"; $dirs = @\\(\"app\",\"app/dashboard\",\"app/playground\",\"app/exercises\",\"app/exercises/[id]\",\"app/exam\",\"app/schema\",\"components\",\"lib\",\"data\",\"public\",\"scripts\",\"styles\"\\); foreach\\($d in $dirs\\){ New-Item -ItemType Directory -Force -Path \\(Join-Path $base $d\\) | Out-Null }; Get-ChildItem $base -Recurse -Directory | Select-Object FullName)",
       "PowerShell(Move-Item \"C:\\\\Users\\\\ruben\\\\SQL\\\\public\\\\seed.sql\" \"C:\\\\Users\\\\ruben\\\\SQL\\\\public\\\\seed.zoekertje.sql\" -Force)",
-      "PowerShell(Move-Item \"C:\\\\Users\\\\ruben\\\\SQL\\\\data\\\\exercises.json\" \"C:\\\\Users\\\\ruben\\\\SQL\\\\data\\\\exercises.zoekertje.json\" -Force)"
+      "PowerShell(Move-Item \"C:\\\\Users\\\\ruben\\\\SQL\\\\data\\\\exercises.json\" \"C:\\\\Users\\\\ruben\\\\SQL\\\\data\\\\exercises.zoekertje.json\" -Force)",
+      "Bash(Get-ChildItem -Path . -Directory)",
+      "Bash(Select-Object Name)"
     ]
   }
 }
