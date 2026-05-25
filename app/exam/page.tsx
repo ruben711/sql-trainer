@@ -7,6 +7,7 @@ import ResultTable from "@/components/ResultTable";
 import { runQuery, QueryResult } from "@/lib/db";
 import { useMode, MODES } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
+import { track } from "@/lib/logger";
 import Link from "next/link";
 
 const DEFAULT_MINUTES = 30;
@@ -63,6 +64,7 @@ export default function ExamPage() {
     setStarted(true);
     setFinished(false);
     setDeadline(Date.now() + minutes * 60_000);
+    track("exam_started", { mode, questions: qs.length, minutes });
   }
   async function runPreview() { setPreview(await runQuery(mode, sql)); }
   async function submitAnswer() {
@@ -74,7 +76,14 @@ export default function ExamPage() {
     if (idx + 1 >= questions.length) finish();
     else { setIdx(idx + 1); setSql(""); setPreview(null); }
   }
-  function finish() { setFinished(true); setStarted(false); }
+  function finish() {
+    setFinished(true);
+    setStarted(false);
+    const correct = answers.filter((a) => a.correct).length;
+    track("exam_completed", {
+      mode, total: questions.length, correct, percent: Math.round((correct / Math.max(questions.length, 1)) * 100),
+    });
+  }
   const score = useMemo(() => answers.filter((a) => a.correct).length, [answers]);
 
   // ─── Pre-exam config ───────────────────────────────────────────────

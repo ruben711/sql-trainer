@@ -433,5 +433,319 @@
     "solution": "CREATE VIEW ActieveGebruikers AS SELECT gebruikersnaam, COUNT(*) AS aantal FROM Zoekertje GROUP BY gebruikersnaam; SELECT * FROM ActieveGebruikers ORDER BY aantal DESC;",
     "orderMatters": true,
     "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "x-01",
+    "chapter": "Verdieping · Joins",
+    "title": "Zoekertjes met meerdere kleuren",
+    "difficulty": "hard",
+    "tags": ["join", "group-by", "having"],
+    "prompt": "Welke zoekertjes hebben meer dan één kleur? Toon de titel en het aantal kleuren.",
+    "solution": "SELECT z.titel, COUNT(kz.kleurID) AS aantal FROM Zoekertje z JOIN Kleur_Zoekertje kz ON kz.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel HAVING COUNT(kz.kleurID) > 1;",
+    "relatedTables": ["Zoekertje", "Kleur_Zoekertje"]
+  },
+  {
+    "id": "x-02",
+    "chapter": "Verdieping · Joins",
+    "title": "Combinatie kleur en materiaal",
+    "difficulty": "hard",
+    "tags": ["join", "m2n", "multi"],
+    "prompt": "Toon voor elk zoekertje dat zowel een kleur als een materiaal heeft: de titel, de kleur en het materiaal.",
+    "solution": "SELECT z.titel, k.kleur, m.materiaal FROM Zoekertje z JOIN Kleur_Zoekertje kz ON kz.zoekertjeID = z.zoekertjeID JOIN Kleur k ON k.ID = kz.kleurID JOIN Materiaal_Zoekertje mz ON mz.zoekertjeID = z.zoekertjeID JOIN Materiaal m ON m.ID = mz.materiaalID;",
+    "relatedTables": ["Zoekertje", "Kleur_Zoekertje", "Kleur", "Materiaal_Zoekertje", "Materiaal"]
+  },
+  {
+    "id": "x-03",
+    "chapter": "Verdieping · Joins",
+    "title": "Aantal foto's per zoekertje",
+    "difficulty": "medium",
+    "tags": ["join", "left", "group-by"],
+    "prompt": "Toon voor elk zoekertje de titel en het aantal foto's. Ook zoekertjes zonder foto moeten verschijnen (met 0).",
+    "solution": "SELECT z.titel, COUNT(f.ID) AS aantal_fotos FROM Zoekertje z LEFT JOIN Foto f ON f.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel;",
+    "relatedTables": ["Zoekertje", "Foto"]
+  },
+  {
+    "id": "x-04",
+    "chapter": "Verdieping · Joins",
+    "title": "Gebruikers met biedingen op eigen zoekertje",
+    "difficulty": "hard",
+    "tags": ["join", "self-ref"],
+    "prompt": "Welke gebruikers hebben ooit zelf op één van hun eigen zoekertjes geboden? Toon de gebruikersnaam.",
+    "solution": "SELECT DISTINCT b.gebruikersnaam FROM Bod b JOIN Zoekertje z ON z.zoekertjeID = b.zoekertjeID WHERE b.gebruikersnaam = z.gebruikersnaam;",
+    "relatedTables": ["Bod", "Zoekertje"]
+  },
+  {
+    "id": "x-05",
+    "chapter": "Verdieping · Joins",
+    "title": "Zoekertjes uit dezelfde plaats als bieder",
+    "difficulty": "hard",
+    "tags": ["join", "multi"],
+    "prompt": "Toon de titel van het zoekertje, de gebruikersnaam van de bieder en het bedrag — enkel voor biedingen waar de bieder in dezelfde plaats woont als de verkoper.",
+    "solution": "SELECT z.titel, b.gebruikersnaam, b.bod FROM Bod b JOIN Zoekertje z ON z.zoekertjeID = b.zoekertjeID JOIN Gebruiker bieder ON bieder.gebruikersnaam = b.gebruikersnaam JOIN Gebruiker verkoper ON verkoper.gebruikersnaam = z.gebruikersnaam WHERE bieder.plaats = verkoper.plaats;",
+    "relatedTables": ["Bod", "Zoekertje", "Gebruiker"]
+  },
+
+  {
+    "id": "x-06",
+    "chapter": "Verdieping · Aggregatie",
+    "title": "Aantal biedingen + hoogste bod per zoekertje",
+    "difficulty": "medium",
+    "tags": ["join", "group-by", "agg"],
+    "prompt": "Toon per zoekertje (met biedingen): de titel, het aantal biedingen en het hoogste bod.",
+    "solution": "SELECT z.titel, COUNT(b.ID) AS aantal, MAX(b.bod) AS hoogste FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel;",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "x-07",
+    "chapter": "Verdieping · Aggregatie",
+    "title": "Totale waarde per afdeling",
+    "difficulty": "hard",
+    "tags": ["join", "group-by", "sum"],
+    "prompt": "Toon per afdeling de totale waarde (som van alle prijzen) van zoekertjes in die afdeling. Tel zoekertjes zonder prijs niet mee.",
+    "solution": "SELECT a.omschrijving, SUM(z.prijs) AS totaal FROM Afdeling a JOIN Rubriek r ON r.afdelingID = a.ID JOIN Categorie c ON c.rubriekID = r.ID JOIN Zoekertje z ON z.categorieID = c.ID WHERE z.prijs IS NOT NULL GROUP BY a.ID, a.omschrijving;",
+    "relatedTables": ["Afdeling", "Rubriek", "Categorie", "Zoekertje"]
+  },
+  {
+    "id": "x-08",
+    "chapter": "Verdieping · Aggregatie",
+    "title": "Gemiddelde prijs per categorie",
+    "difficulty": "medium",
+    "tags": ["group-by", "avg", "join"],
+    "prompt": "Toon per categorie de omschrijving en de gemiddelde prijs, enkel voor categorieën met minstens 1 zoekertje met prijs. Sorteer op gemiddelde aflopend.",
+    "solution": "SELECT c.omschrijving, AVG(z.prijs) AS gem FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID WHERE z.prijs IS NOT NULL GROUP BY c.ID, c.omschrijving ORDER BY gem DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Categorie", "Zoekertje"]
+  },
+  {
+    "id": "x-09",
+    "chapter": "Verdieping · Aggregatie",
+    "title": "Aantal bieders per zoekertje",
+    "difficulty": "medium",
+    "tags": ["count-distinct", "group-by"],
+    "prompt": "Toon per zoekertje met biedingen: de titel en het aantal verschillende bieders.",
+    "solution": "SELECT z.titel, COUNT(DISTINCT b.gebruikersnaam) AS aantal_bieders FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel;",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "x-10",
+    "chapter": "Verdieping · Aggregatie",
+    "title": "Gebruikers met meerdere zoekertjes per categorie",
+    "difficulty": "hard",
+    "tags": ["group-by", "having"],
+    "prompt": "Welke combinaties van (gebruiker, categorie) hebben meer dan 1 zoekertje? Toon de gebruikersnaam, de categorie-ID en het aantal.",
+    "solution": "SELECT gebruikersnaam, categorieID, COUNT(*) AS aantal FROM Zoekertje GROUP BY gebruikersnaam, categorieID HAVING COUNT(*) > 1;",
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "x-11",
+    "chapter": "Verdieping · Subqueries",
+    "title": "Bieders met bod boven gemiddelde",
+    "difficulty": "hard",
+    "tags": ["subquery", "correlated"],
+    "prompt": "Welke biedingen liggen boven het gemiddelde bod op datzelfde zoekertje? Toon de gebruikersnaam, het bedrag en het zoekertjeID.",
+    "solution": "SELECT b1.gebruikersnaam, b1.bod, b1.zoekertjeID FROM Bod b1 WHERE b1.bod > (SELECT AVG(b2.bod) FROM Bod b2 WHERE b2.zoekertjeID = b1.zoekertjeID);",
+    "relatedTables": ["Bod"],
+    "hints": ["Dit is een gecorreleerde subquery: de subquery refereert naar de buitenste rij via `b1.zoekertjeID`."]
+  },
+  {
+    "id": "x-12",
+    "chapter": "Verdieping · Subqueries",
+    "title": "Duurste zoekertje per categorie",
+    "difficulty": "hard",
+    "tags": ["subquery", "correlated", "max"],
+    "prompt": "Toon voor elke categorie het duurste zoekertje: titel en prijs.",
+    "solution": "SELECT z.titel, z.prijs FROM Zoekertje z WHERE z.prijs = (SELECT MAX(z2.prijs) FROM Zoekertje z2 WHERE z2.categorieID = z.categorieID);",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "x-13",
+    "chapter": "Verdieping · Subqueries",
+    "title": "Gebruikers zonder bod ooit",
+    "difficulty": "medium",
+    "tags": ["subquery", "not-exists"],
+    "prompt": "Welke gebruikers hebben nog nooit een bod uitgebracht? Gebruik NOT EXISTS.",
+    "solution": "SELECT gebruikersnaam FROM Gebruiker g WHERE NOT EXISTS (SELECT 1 FROM Bod b WHERE b.gebruikersnaam = g.gebruikersnaam);",
+    "relatedTables": ["Gebruiker", "Bod"]
+  },
+  {
+    "id": "x-14",
+    "chapter": "Verdieping · Subqueries",
+    "title": "Top 3 duurste zoekertjes met bieder",
+    "difficulty": "hard",
+    "tags": ["cte", "rank", "join"],
+    "prompt": "Toon de top 3 duurste zoekertjes (titel + prijs) waarop ook minstens één bod werd uitgebracht.",
+    "solution": "SELECT DISTINCT z.titel, z.prijs FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID WHERE z.prijs IS NOT NULL ORDER BY z.prijs DESC LIMIT 3;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "x-15",
+    "chapter": "Verdieping · Subqueries",
+    "title": "ANY-operator",
+    "difficulty": "hard",
+    "tags": ["subquery", "any"],
+    "prompt": "Welke zoekertjes hebben een prijs die hoger is dan het laagste bod ooit uitgebracht? Toon titel en prijs.",
+    "solution": "SELECT titel, prijs FROM Zoekertje WHERE prijs > (SELECT MIN(bod) FROM Bod);",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "x-16",
+    "chapter": "Verdieping · Subqueries",
+    "title": "ALL-operator",
+    "difficulty": "hard",
+    "tags": ["subquery", "all"],
+    "prompt": "Welke zoekertjes hebben een prijs die hoger is dan elk bod dat ooit op een ander zoekertje werd uitgebracht? Toon titel en prijs.",
+    "solution": "SELECT titel, prijs FROM Zoekertje WHERE prijs > ALL (SELECT bod FROM Bod);",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+
+  {
+    "id": "x-17",
+    "chapter": "Verdieping · CTE",
+    "title": "Top-bieder per zoekertje (CTE)",
+    "difficulty": "hard",
+    "tags": ["cte", "with", "join"],
+    "prompt": "Toon per zoekertje (met biedingen): de titel, het hoogste bod en de gebruikersnaam van wie dat bod plaatste. Gebruik een WITH-clausule.",
+    "solution": "WITH max_per_zkr AS (SELECT zoekertjeID, MAX(bod) AS hoogste FROM Bod GROUP BY zoekertjeID) SELECT z.titel, m.hoogste, b.gebruikersnaam FROM max_per_zkr m JOIN Zoekertje z ON z.zoekertjeID = m.zoekertjeID JOIN Bod b ON b.zoekertjeID = m.zoekertjeID AND b.bod = m.hoogste;",
+    "relatedTables": ["Bod", "Zoekertje"]
+  },
+  {
+    "id": "x-18",
+    "chapter": "Verdieping · CTE",
+    "title": "Meerdere CTE's",
+    "difficulty": "hard",
+    "tags": ["cte", "with"],
+    "prompt": "Toon per gebruiker: het aantal eigen zoekertjes en het aantal biedingen dat hij/zij plaatste. Gebruik twee CTE's. Enkel gebruikers met minstens één van beide.",
+    "solution": "WITH zkr AS (SELECT gebruikersnaam, COUNT(*) AS n_zkr FROM Zoekertje GROUP BY gebruikersnaam), bds AS (SELECT gebruikersnaam, COUNT(*) AS n_bod FROM Bod GROUP BY gebruikersnaam) SELECT g.gebruikersnaam, COALESCE(zkr.n_zkr, 0) AS aantal_zkr, COALESCE(bds.n_bod, 0) AS aantal_bod FROM Gebruiker g LEFT JOIN zkr ON zkr.gebruikersnaam = g.gebruikersnaam LEFT JOIN bds ON bds.gebruikersnaam = g.gebruikersnaam WHERE zkr.n_zkr IS NOT NULL OR bds.n_bod IS NOT NULL;",
+    "relatedTables": ["Gebruiker", "Zoekertje", "Bod"]
+  },
+
+  {
+    "id": "x-19",
+    "chapter": "Verdieping · CASE in aggregatie",
+    "title": "Aantal per prijsklasse",
+    "difficulty": "hard",
+    "tags": ["case", "agg", "sum"],
+    "prompt": "Toon één rij met drie kolommen: hoeveel zoekertjes zijn 'goedkoop' (<50), 'midden' (50-200) en 'duur' (>200). Negeer zoekertjes zonder prijs.",
+    "solution": "SELECT SUM(CASE WHEN prijs < 50 THEN 1 ELSE 0 END) AS goedkoop, SUM(CASE WHEN prijs BETWEEN 50 AND 200 THEN 1 ELSE 0 END) AS midden, SUM(CASE WHEN prijs > 200 THEN 1 ELSE 0 END) AS duur FROM Zoekertje WHERE prijs IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "x-20",
+    "chapter": "Verdieping · CASE in aggregatie",
+    "title": "Verzendquota per categorie",
+    "difficulty": "hard",
+    "tags": ["case", "join", "group-by"],
+    "prompt": "Toon per categorie de omschrijving en het aandeel (percentage als geheel getal) van zoekertjes dat verzonden kan worden.",
+    "solution": "SELECT c.omschrijving, CAST(100.0 * SUM(CASE WHEN z.verzenden = 1 THEN 1 ELSE 0 END) / COUNT(*) AS INTEGER) AS percent FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID GROUP BY c.ID, c.omschrijving;",
+    "relatedTables": ["Categorie", "Zoekertje"]
+  },
+
+  {
+    "id": "x-21",
+    "chapter": "Verdieping · Datums",
+    "title": "Biedingen in november 2024",
+    "difficulty": "medium",
+    "tags": ["date", "where"],
+    "prompt": "Welke biedingen werden in november 2024 geplaatst? Toon zoekertjeID, gebruikersnaam, bod en datum.",
+    "solution": "SELECT zoekertjeID, gebruikersnaam, bod, datum FROM Bod WHERE datum >= '2024-11-01' AND datum < '2024-12-01';",
+    "relatedTables": ["Bod"]
+  },
+  {
+    "id": "x-22",
+    "chapter": "Verdieping · Datums",
+    "title": "Lidmaatschap jaartal",
+    "difficulty": "medium",
+    "tags": ["date", "substring"],
+    "prompt": "Toon per jaar (afgeleid uit lidsinds) het aantal gebruikers dat dat jaar lid werd. Sorteer op jaar.",
+    "solution": "SELECT SUBSTR(lidsinds, 1, 4) AS jaar, COUNT(*) AS aantal FROM Gebruiker GROUP BY SUBSTR(lidsinds, 1, 4) ORDER BY jaar;",
+    "orderMatters": true,
+    "relatedTables": ["Gebruiker"]
+  },
+
+  {
+    "id": "x-23",
+    "chapter": "Verdieping · Set-operatoren",
+    "title": "Gebruikers actief in twee rollen",
+    "difficulty": "hard",
+    "tags": ["intersect", "union"],
+    "prompt": "Geef de gebruikersnamen van wie zowel zoekertjes plaatste als biedingen uitbracht, samen met de gebruikers die enkel boden maar geen zoekertje hebben. Geef alles in één kolom 'gebruikersnaam'.",
+    "solution": "SELECT gebruikersnaam FROM Zoekertje INTERSECT SELECT gebruikersnaam FROM Bod UNION SELECT gebruikersnaam FROM Bod EXCEPT SELECT gebruikersnaam FROM Zoekertje;",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+
+  {
+    "id": "x-24",
+    "chapter": "Verdieping · Combineren",
+    "title": "Zoekertje met beste prijs/foto-ratio",
+    "difficulty": "hard",
+    "tags": ["cte", "join", "ratio"],
+    "prompt": "Toon voor elk zoekertje met minstens één foto: de titel, de prijs, het aantal foto's en de prijs per foto (prijs / aantal). Sorteer op die ratio oplopend. Negeer zoekertjes zonder prijs.",
+    "solution": "WITH f AS (SELECT zoekertjeID, COUNT(*) AS aantal FROM Foto GROUP BY zoekertjeID) SELECT z.titel, z.prijs, f.aantal, z.prijs / f.aantal AS ratio FROM Zoekertje z JOIN f ON f.zoekertjeID = z.zoekertjeID WHERE z.prijs IS NOT NULL ORDER BY ratio ASC;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje", "Foto"]
+  },
+  {
+    "id": "x-25",
+    "chapter": "Verdieping · Combineren",
+    "title": "Categorieën met enkel dure zoekertjes",
+    "difficulty": "hard",
+    "tags": ["group-by", "having", "min"],
+    "prompt": "Welke categorieën hebben enkel dure zoekertjes (alle prijzen ≥ 100)? Toon de omschrijving. Negeer categorieën zonder zoekertjes met prijs.",
+    "solution": "SELECT c.omschrijving FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID WHERE z.prijs IS NOT NULL GROUP BY c.ID, c.omschrijving HAVING MIN(z.prijs) >= 100;",
+    "relatedTables": ["Categorie", "Zoekertje"]
+  },
+  {
+    "id": "x-26",
+    "chapter": "Verdieping · Combineren",
+    "title": "Hiërarchie zonder kinderen",
+    "difficulty": "hard",
+    "tags": ["left", "join", "anti"],
+    "prompt": "Welke rubrieken hebben geen enkele categorie? Toon de omschrijving van de rubriek.",
+    "solution": "SELECT r.omschrijving FROM Rubriek r LEFT JOIN Categorie c ON c.rubriekID = r.ID WHERE c.ID IS NULL;",
+    "relatedTables": ["Rubriek", "Categorie"]
+  },
+  {
+    "id": "x-27",
+    "chapter": "Verdieping · Combineren",
+    "title": "Best scorende verkoper",
+    "difficulty": "hard",
+    "tags": ["cte", "join", "agg"],
+    "prompt": "Wie heeft het hoogste totaalbedrag aan biedingen op zijn/haar zoekertjes ontvangen? Toon de gebruikersnaam en het totaalbedrag.",
+    "solution": "WITH per_verkoper AS (SELECT z.gebruikersnaam, SUM(b.bod) AS totaal FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.gebruikersnaam) SELECT gebruikersnaam, totaal FROM per_verkoper WHERE totaal = (SELECT MAX(totaal) FROM per_verkoper);",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "x-28",
+    "chapter": "Verdieping · NULL & COALESCE",
+    "title": "Effectieve startprijs",
+    "difficulty": "medium",
+    "tags": ["coalesce", "case"],
+    "prompt": "Toon voor elk zoekertje de titel en een 'startprijs': gebruik prijs als die niet NULL is, anders biedenvanaf, anders 0.",
+    "solution": "SELECT titel, COALESCE(prijs, biedenvanaf, 0) AS startprijs FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "x-29",
+    "chapter": "Verdieping · NULL & COALESCE",
+    "title": "Aantal NULL-velden",
+    "difficulty": "hard",
+    "tags": ["case", "agg"],
+    "prompt": "Hoeveel zoekertjes hebben respectievelijk geen prijs, geen breedte en geen stijlID? Toon één rij met drie kolommen.",
+    "solution": "SELECT SUM(CASE WHEN prijs IS NULL THEN 1 ELSE 0 END) AS geen_prijs, SUM(CASE WHEN breedte IS NULL THEN 1 ELSE 0 END) AS geen_breedte, SUM(CASE WHEN stijlID IS NULL THEN 1 ELSE 0 END) AS geen_stijl FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "x-30",
+    "chapter": "Verdieping · Views",
+    "title": "View HoogsteBiedingen",
+    "difficulty": "hard",
+    "tags": ["view", "cte"],
+    "prompt": "Maak een view HoogsteBiedingen die per zoekertje (met biedingen) zoekertjeID, titel en hoogste bod toont. Selecteer daarna alle rijen uit de view, gesorteerd op hoogste bod aflopend.",
+    "solution": "CREATE VIEW HoogsteBiedingen AS SELECT z.zoekertjeID, z.titel, MAX(b.bod) AS hoogste FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel; SELECT * FROM HoogsteBiedingen ORDER BY hoogste DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje", "Bod"]
   }
 ]

@@ -218,6 +218,36 @@ A: €0 op Vercel Hobby. Voor wat vrienden gebruik je 0,1% van de free-tier-limi
 
 ---
 
+## 📈 Discord-logging (optioneel)
+
+De app kan bezoek + oefenactiviteit naar een private Discord-channel sturen.
+
+**Setup:**
+1. In je Discord-server → kanaal-instellingen → **Integrations** → **Webhooks** → **New Webhook** → kopieer URL
+2. Vercel-dashboard → je project → **Settings** → **Environment Variables** → voeg toe:
+   - `DISCORD_WEBHOOK_URL` = de gekopieerde URL
+   - (optioneel) `LOG_SECRET` = random string (extra bescherming tegen misbruik)
+3. **Redeploy** (Deployments → ⋯ → Redeploy)
+
+**Wat wordt gelogd:**
+| Event | Wanneer | Data |
+|---|---|---|
+| 👤 Visitor | Eerste bezoek per dag per device | gehasht IP, land/stad (via Vercel geo), browser |
+| 🔀 Mode changed | Bij modus-switch | nieuwe modus |
+| 👁️ Exercise view | Bij openen oefening | id, modus, hoofdstuk, moeilijkheid |
+| ✅ / ❌ Exercise | Bij verbeteren | id, poging-nummer, query (eerste 500 chars) |
+| 🏁 Exam started | Bij starten | aantal vragen, tijdslimiet |
+| 🎯 Exam completed | Bij einde | totaal, juist, percentage |
+
+**Privacy & GDPR:**
+- IP wordt **gehasht** (eerste 2 octets bij IPv4) — exact IP wordt nooit verstuurd
+- Wachtwoorden / persoonlijke data zitten niet in de app
+- Rate-limit: 30 events/minuut/IP (Edge-instance)
+- Footer-banner waarschuwt bezoekers expliciet
+- Voor strikte compliance: voeg een cookie/consent banner toe en zet `track()` calls achter een opt-in
+
+**Zonder webhook:** laat `DISCORD_WEBHOOK_URL` leeg → de route returnt 200 zonder iets te doen, app werkt normaal.
+
 ## 📄 Licentie
 
 MIT — doe ermee wat je wil. Veel succes met je examen 🚀

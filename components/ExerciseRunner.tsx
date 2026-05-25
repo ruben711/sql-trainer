@@ -7,6 +7,7 @@ import { gradeQuery, GradingResult } from "@/lib/grader";
 import { useProgress } from "@/lib/store";
 import { useMode } from "@/lib/modes";
 import { useHighlight } from "@/lib/highlight";
+import { track } from "@/lib/logger";
 import type { Exercise } from "@/lib/exercises";
 
 const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
@@ -31,6 +32,7 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setShowSolution(false);
     setRevealedHints(0);
     setHighlight(exercise.relatedTables ?? []);
+    track("exercise_view", { id: exercise.id, mode, chapter: exercise.chapter, difficulty: exercise.difficulty });
     return () => setHighlight([]);
   }, [exercise.id]);
 
@@ -44,6 +46,11 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setGrading(grading);
     setAttempts((a) => a + 1);
     record(mode, { exerciseId: exercise.id, correct: grading.correct, query: sql });
+    track(grading.correct ? "exercise_completed" : "exercise_failed", {
+      id: exercise.id, mode, attempt: attempts + 1,
+      difficulty: exercise.difficulty, chapter: exercise.chapter,
+      query: sql.slice(0, 500),
+    });
     if (grading.correct) onSolved?.();
     setBusy(false);
   }
