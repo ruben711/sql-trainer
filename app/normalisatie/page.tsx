@@ -1,7 +1,9 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import data from "@/data/normalisatie.json";
 import clsx from "clsx";
+
+const STORAGE_KEY = "sql-trainer-normalisatie-v1";
 
 type Step = {
   id: string;
@@ -28,6 +30,30 @@ export default function NormalisatiePage() {
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [done, setDone] = useState<Record<string, boolean>>({});
+  const [hydrated, setHydrated] = useState(false);
+
+  // Laad opgeslagen voortgang
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.inputs) setInputs(saved.inputs);
+        if (saved.revealed) setRevealed(saved.revealed);
+        if (saved.done) setDone(saved.done);
+        if (saved.activeId && exercises.find((e) => e.id === saved.activeId)) setActiveId(saved.activeId);
+      }
+    } catch { /* ignore */ }
+    setHydrated(true);
+  }, []);
+
+  // Persist
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ inputs, revealed, done, activeId }));
+    } catch { /* ignore */ }
+  }, [inputs, revealed, done, activeId, hydrated]);
 
   // State per oefening — reset bij wisselen
   const stateKey = (sid: string) => `${ex.id}::${sid}`;
@@ -74,53 +100,60 @@ export default function NormalisatiePage() {
         ))}
       </div>
 
-      {/* Opgave-context */}
-      <div className="pane">
-        <div className="pane-header"><span>Opgave — {ex.title}</span></div>
-        <div className="p-4 space-y-3 text-sm">
-          <p className="text-fg">{ex.context}</p>
-          {ex.remarks && ex.remarks.length > 0 && (
-            <div>
-              <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Opmerkingen vooraf</div>
-              <ul className="list-disc list-inside text-fg-muted space-y-0.5">
-                {ex.remarks.map((r, i) => <li key={i}>{r}</li>)}
-              </ul>
+      {/* Twee koloms layout op desktop: opgave sticky links, stappen rechts */}
+      <div className="grid xl:grid-cols-[400px_1fr] gap-3 items-start">
+        {/* Sticky opgave-pane */}
+        <aside className="xl:sticky xl:top-3 xl:self-start xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
+          <div className="pane">
+            <div className="pane-header"><span>Opgave — {ex.title}</span></div>
+            <div className="p-4 space-y-3 text-sm">
+              <p className="text-fg">{ex.context}</p>
+              {ex.remarks && ex.remarks.length > 0 && (
+                <div>
+                  <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Opmerkingen vooraf</div>
+                  <ul className="list-disc list-inside text-fg-muted space-y-0.5">
+                    {ex.remarks.map((r, i) => <li key={i}>{r}</li>)}
+                  </ul>
+                </div>
+              )}
+              {ex.sampleData && ex.sampleData.length > 0 && (
+                <div>
+                  <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Voorbeeld (lezer)</div>
+                  <table className="result">
+                    <tbody>
+                      {ex.sampleData.map(([k, v], i) => (
+                        <tr key={i}>
+                          <td className="font-mono text-fg-dim w-32">{k}</td>
+                          <td>{v}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {ex.sampleTable && (
+                <div>
+                  <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Voorbeelddata</div>
+                  <div className="overflow-x-auto">
+                    <table className="result">
+                      <thead>
+                        <tr>{ex.sampleTable.headers.map((h) => <th key={h}>{h}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {ex.sampleTable.rows.map((row, i) => (
+                          <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-          {ex.sampleData && ex.sampleData.length > 0 && (
-            <div>
-              <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Voorbeeld (lezer)</div>
-              <table className="result">
-                <tbody>
-                  {ex.sampleData.map(([k, v], i) => (
-                    <tr key={i}>
-                      <td className="font-mono text-fg-dim w-32">{k}</td>
-                      <td>{v}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {ex.sampleTable && (
-            <div>
-              <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Voorbeelddata</div>
-              <div className="overflow-x-auto">
-                <table className="result">
-                  <thead>
-                    <tr>{ex.sampleTable.headers.map((h) => <th key={h}>{h}</th>)}</tr>
-                  </thead>
-                  <tbody>
-                    {ex.sampleTable.rows.map((row, i) => (
-                      <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </aside>
+
+        {/* Rechter kolom: stappen + cheat-sheet */}
+        <div className="space-y-3 min-w-0">
 
       {/* Stappen */}
       <div className="pane">
@@ -212,6 +245,8 @@ export default function NormalisatiePage() {
           <div className="pt-2 border-t border-line text-2xs text-fg-dim">
             Stappenplan: attributen oplijsten → 0/1NF check → f.a. bepalen → kandidaatsleutel → 2NF check + splits → 3NF check elke tabel + splits → finale tabellen + PK/FK + ERD.
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

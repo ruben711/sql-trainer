@@ -1,8 +1,10 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import test1Data from "@/data/theory.nosql.json";
 import test2Data from "@/data/theory.nosql.test2.json";
 import clsx from "clsx";
+
+const STORAGE_KEY = "sql-trainer-theory-v1";
 
 type MCQuestion = {
   id: string;
@@ -45,11 +47,33 @@ type AnswerState =
 
 export default function TheoryPage() {
   const [activeTest, setActiveTest] = useState<"v1" | "v2">("v1");
-  // Aparte answer-state per test
   const [byTest, setByTest] = useState<Record<string, Record<string, AnswerState>>>({ v1: {}, v2: {} });
   const [inputsByTest, setInputsByTest] = useState<Record<string, Record<string, string>>>({ v1: {}, v2: {} });
   const [showAllExplanations, setShowAllExplanations] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "wrong" | "todo">("all");
+  const [hydrated, setHydrated] = useState(false);
+
+  // Laad opgeslagen voortgang bij eerste mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.byTest) setByTest(saved.byTest);
+        if (saved.inputsByTest) setInputsByTest(saved.inputsByTest);
+        if (saved.activeTest) setActiveTest(saved.activeTest);
+      }
+    } catch { /* ignore */ }
+    setHydrated(true);
+  }, []);
+
+  // Persist alle wijzigingen
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ byTest, inputsByTest, activeTest }));
+    } catch { /* quota? ignore */ }
+  }, [byTest, inputsByTest, activeTest, hydrated]);
 
   // Test 1 status om Test 2 te ontgrendelen
   const test1Done = useMemo(() => {
