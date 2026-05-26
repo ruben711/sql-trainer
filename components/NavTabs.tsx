@@ -8,6 +8,7 @@ const tabs = [
   { href: "/playground", label: "Playground" },
   { href: "/exam", label: "Examensimulatie" },
   { href: "/theory", label: "Theorie" },
+  { href: "/normalisatie", label: "Normalisatie" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/schema", label: "Schema" },
 ];

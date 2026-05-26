@@ -1,0 +1,272 @@
+{
+  "exercises": [
+    {
+      "id": "norm-bibliotheek",
+      "title": "Bibliotheek",
+      "context": "Een kleine bibliotheek wil van iedere lezer een overzicht kunnen krijgen. Ontwerp hiervoor een relationele database door te normaliseren naar derde normaalvorm.",
+      "remarks": [
+        "Een lezer kan meerdere keren eenzelfde boek lenen.",
+        "Een exemplaar kan op een dag maar aan één lezer uitgeleend worden."
+      ],
+      "sampleData": [
+        ["Lezersid", "1024578"],
+        ["Naam", "Piet Paaltjens"],
+        ["Adres", "Zeeweg 4, 4058 Bilderdijk"],
+        ["Tel", "(025)35.26.54"],
+        ["Beroep", "Onbekend"]
+      ],
+      "sampleTable": {
+        "headers": ["Exemplaar", "ISBN", "Auteur", "Titel", "Uitgeverij", "Jaar", "Uitleendatum", "Datum terug"],
+        "rows": [
+          ["542368", "9780321227317", "Hulsens Eric", "Waarom lusten kinderen nog reuzen?", "Infodok", "1980", "01-03-2015", "23-03-2015"],
+          ["457850", "4589275623248", "Hoppenbrouwers Cor", "Jongerentaal", "Stubeg", "1991", "01-03-2015", "—"],
+          ["478958", "5278556611458", "Spillebeen Willy", "Cortés of de Val", "Houtekiet", "1994", "23-03-2015", "—"],
+          ["789456", "4585263252345", "Istendael Geert van", "Bekentenissen van een Reactionair", "Atlas", "1994", "23-03-2015", "—"]
+        ]
+      },
+      "steps": [
+        {
+          "id": "attrs",
+          "title": "Stap 1 — Attributen uit opgave halen",
+          "prompt": "Haal alle attributen uit de opgave. Schrijf ze als één relatie Uitlening(…).",
+          "model": "Uitlening(id_lezer, voornaam, naam, adres, postcode, gemeente, tel, beroep, id_exemplaar, isbn, auteur, titel, uitgever, jaar, uitleendatum, datum_terug)"
+        },
+        {
+          "id": "0nf",
+          "title": "Stap 2 — 0NF check",
+          "prompt": "0NF? Kan alle data in tabelvorm genoteerd worden?",
+          "model": "Ja. Alle data kan in tabelvorm genoteerd worden."
+        },
+        {
+          "id": "1nf",
+          "title": "Stap 3 — 1NF check",
+          "prompt": "1NF? Zijn alle waarden atomair?",
+          "model": "Ja, alle waarden zijn atomair → relationele tabel. Volgende stap: functionele afhankelijkheden + kandidaatsleutel bepalen."
+        },
+        {
+          "id": "fa",
+          "title": "Stap 4 — Functionele afhankelijkheden",
+          "prompt": "Som de functionele afhankelijkheden op (de niet-triviale).",
+          "model": "id_lezer → voornaam, naam, adres, postcode, gemeente, tel, beroep\nid_exemplaar → isbn\nisbn → auteur, titel, uitgever, jaar\n(uitleendatum, id_exemplaar) → datum_terug, id_lezer\npostcode → gemeente (afhankelijk van interpretatie)"
+        },
+        {
+          "id": "kandidaat",
+          "title": "Stap 5 — Kandidaatsleutel",
+          "prompt": "Wat is de kandidaatsleutel van Uitlening?",
+          "model": "(uitleendatum, id_exemplaar) — gebaseerd op de opmerking dat een exemplaar op een dag maar aan één lezer uitgeleend kan worden."
+        },
+        {
+          "id": "2nf-check",
+          "title": "Stap 6 — 2NF check",
+          "prompt": "Staat Uitlening in 2NF? Zo niet, welke partiële f.a. zijn er?",
+          "model": "Neen. Er zijn partiële f.a. van de samengestelde kandidaatsleutel:\n• (id_exemplaar) → isbn, auteur, titel, uitgever, jaar\n• Geen partiële f.a. via uitleendatum alleen."
+        },
+        {
+          "id": "2nf-split",
+          "title": "Stap 7 — 2NF splitsing",
+          "prompt": "Splits de probleemattributen af naar een nieuwe tabel. Geef beide tabellen.",
+          "model": "Uitlening(uitleendatum, id_exemplaar, datum_terug, id_lezer, voornaam, naam, adres, postcode, gemeente, tel, beroep)\nExemplaar(id_exemplaar, isbn, auteur, titel, uitgever, jaar)"
+        },
+        {
+          "id": "3nf-uitlening-check",
+          "title": "Stap 8 — 3NF check op Uitlening",
+          "prompt": "Staat Uitlening in 3NF? Welke transitieve f.a. zijn er?",
+          "model": "Neen. Transitieve f.a.: (uitleendatum, id_exemplaar) → id_lezer → voornaam, naam, adres, postcode, gemeente, tel, beroep."
+        },
+        {
+          "id": "3nf-uitlening-split",
+          "title": "Stap 9 — 3NF splitsing van Uitlening",
+          "prompt": "Splits Uitlening op zodat ze in 3NF staat. Geef beide nieuwe tabellen.",
+          "model": "Uitlening(uitleendatum, id_exemplaar, datum_terug, id_lezer)\nLezer(id_lezer, voornaam, naam, adres, postcode, gemeente, tel, beroep)"
+        },
+        {
+          "id": "3nf-exemplaar-check",
+          "title": "Stap 10 — 3NF check op Exemplaar",
+          "prompt": "Staat Exemplaar in 3NF?",
+          "model": "Neen. Transitieve f.a.: id_exemplaar → isbn → auteur, titel, uitgever, jaar."
+        },
+        {
+          "id": "3nf-exemplaar-split",
+          "title": "Stap 11 — 3NF splitsing van Exemplaar",
+          "prompt": "Splits Exemplaar op. Geef beide tabellen.",
+          "model": "Exemplaar(id_exemplaar, isbn)\nBoek(isbn, auteur, titel, uitgever, jaar)"
+        },
+        {
+          "id": "resultaat",
+          "title": "Stap 12 — Resultaat: 3NF-tabellen",
+          "prompt": "Geef het finale resultaat: alle tabellen in 3NF met PK.",
+          "model": "Uitlening(uitleendatum, id_exemplaar, datum_terug, id_lezer)\nLezer(id_lezer, voornaam, naam, adres, postcode, gemeente, tel, beroep)\nExemplaar(id_exemplaar, isbn)\nBoek(isbn, auteur, titel, uitgever, jaar)\n\nPK: onderstreepte attributen.\nFK: id_lezer → Lezer, id_exemplaar → Exemplaar, isbn → Boek."
+        }
+      ]
+    },
+
+    {
+      "id": "norm-bestelling",
+      "title": "Webshop bestelling",
+      "context": "Een webshop houdt bestellingen bij. Per klant zien we de bestellingen en de producten die in elke bestelling zitten, met aantal en eenheidsprijs op het moment van bestellen. Ontwerp een relationele database door te normaliseren naar 3NF.",
+      "remarks": [
+        "Eén klant kan meerdere bestellingen plaatsen.",
+        "Eén bestelling kan meerdere producten bevatten.",
+        "De prijs in een bestelling is de prijs op moment van bestellen (kan verschillen van huidige productprijs)."
+      ],
+      "sampleData": [
+        ["bestelnr", "B-12001"],
+        ["klant_id", "K-44"],
+        ["klantnaam", "Lisa Janssens"],
+        ["adres", "Lange Straat 12, 9000 Gent"]
+      ],
+      "sampleTable": {
+        "headers": ["Productcode", "Productnaam", "Categorie", "Aantal", "Eenheidsprijs"],
+        "rows": [
+          ["P-1", "Toetsenbord", "Elektronica", "1", "59.00"],
+          ["P-2", "Muis", "Elektronica", "2", "19.50"],
+          ["P-7", "Boek SQL", "Boeken", "1", "32.00"]
+        ]
+      },
+      "steps": [
+        {
+          "id": "attrs",
+          "title": "Stap 1 — Attributen uit opgave halen",
+          "prompt": "Haal alle attributen uit de opgave en schrijf de relatie Bestelling(…).",
+          "model": "Bestelling(bestelnr, klant_id, klantnaam, adres, postcode, gemeente, productcode, productnaam, categorie, aantal, eenheidsprijs)"
+        },
+        {
+          "id": "0nf",
+          "title": "Stap 2 — 0NF check",
+          "prompt": "0NF? Kan alle data in tabelvorm genoteerd worden?",
+          "model": "Ja."
+        },
+        {
+          "id": "1nf",
+          "title": "Stap 3 — 1NF check",
+          "prompt": "1NF? Atomair? Welke kolommen zijn potentieel niet atomair?",
+          "model": "Ja, na opsplitsing van adres in postcode + gemeente zijn alle waarden atomair → 1NF OK."
+        },
+        {
+          "id": "fa",
+          "title": "Stap 4 — Functionele afhankelijkheden",
+          "prompt": "Som de functionele afhankelijkheden op.",
+          "model": "klant_id → klantnaam, adres, postcode, gemeente\nproductcode → productnaam, categorie\nbestelnr → klant_id\n(bestelnr, productcode) → aantal, eenheidsprijs\npostcode → gemeente"
+        },
+        {
+          "id": "kandidaat",
+          "title": "Stap 5 — Kandidaatsleutel",
+          "prompt": "Wat is de kandidaatsleutel van Bestelling?",
+          "model": "(bestelnr, productcode) — bestelnr alleen identificeert niet de regels, productcode alleen ook niet."
+        },
+        {
+          "id": "2nf-check",
+          "title": "Stap 6 — 2NF check",
+          "prompt": "Staat Bestelling in 2NF? Welke partiële f.a.?",
+          "model": "Neen. Partiële f.a.:\n• bestelnr → klant_id, klantnaam, adres, postcode, gemeente\n• productcode → productnaam, categorie"
+        },
+        {
+          "id": "2nf-split",
+          "title": "Stap 7 — 2NF splitsing",
+          "prompt": "Splits de probleemattributen af. Geef de drie tabellen die ontstaan.",
+          "model": "Bestelregel(bestelnr, productcode, aantal, eenheidsprijs)\nBestelling(bestelnr, klant_id, klantnaam, adres, postcode, gemeente)\nProduct(productcode, productnaam, categorie)"
+        },
+        {
+          "id": "3nf-bestelling-check",
+          "title": "Stap 8 — 3NF check op Bestelling",
+          "prompt": "Staat Bestelling in 3NF? Transitieve f.a.?",
+          "model": "Neen. Transitieve f.a.:\n• bestelnr → klant_id → klantnaam, adres, postcode, gemeente\n• postcode → gemeente"
+        },
+        {
+          "id": "3nf-bestelling-split",
+          "title": "Stap 9 — 3NF splitsing van Bestelling",
+          "prompt": "Splits Bestelling op zodat alles in 3NF staat.",
+          "model": "Bestelling(bestelnr, klant_id)\nKlant(klant_id, klantnaam, adres, postcode)\nPlaats(postcode, gemeente)"
+        },
+        {
+          "id": "resultaat",
+          "title": "Stap 10 — Resultaat: 3NF-tabellen",
+          "prompt": "Geef het volledige resultaat in 3NF met PK en FK's.",
+          "model": "Bestelling(bestelnr, klant_id)\nBestelregel(bestelnr, productcode, aantal, eenheidsprijs)\nKlant(klant_id, klantnaam, adres, postcode)\nPlaats(postcode, gemeente)\nProduct(productcode, productnaam, categorie)\n\nFK: klant_id → Klant, postcode → Plaats, bestelnr → Bestelling, productcode → Product."
+        }
+      ]
+    },
+
+    {
+      "id": "norm-cursus",
+      "title": "Studentenresultaten",
+      "context": "Een hogeschool houdt resultaten bij van studenten op vakken. Per resultaatlijn weten we de student, het vak en de docent die het vak doceert. Ontwerp een 3NF-database.",
+      "remarks": [
+        "Elke student volgt meerdere vakken.",
+        "Eén vak wordt door één docent gedoceerd.",
+        "Eén docent kan meerdere vakken doceren.",
+        "Per (student, vak) is er één score."
+      ],
+      "sampleTable": {
+        "headers": ["student_id", "naam", "studierichting", "vak_code", "vak_naam", "credits", "docent_id", "docent_naam", "score"],
+        "rows": [
+          ["S001", "An Peeters", "TI", "V01", "Databases", "6", "D-9", "Prof. De Smet", "14"],
+          ["S001", "An Peeters", "TI", "V02", "Webdev", "5", "D-3", "Prof. Janssens", "12"],
+          ["S002", "Bert Maes", "TI", "V01", "Databases", "6", "D-9", "Prof. De Smet", "16"]
+        ]
+      },
+      "steps": [
+        {
+          "id": "attrs",
+          "title": "Stap 1 — Attributen uit opgave halen",
+          "prompt": "Geef de relatie met alle attributen.",
+          "model": "Resultaat(student_id, naam, studierichting, vak_code, vak_naam, credits, docent_id, docent_naam, score)"
+        },
+        {
+          "id": "0nf",
+          "title": "Stap 2 — 0NF check",
+          "prompt": "0NF?",
+          "model": "Ja, alle data past in tabelvorm."
+        },
+        {
+          "id": "1nf",
+          "title": "Stap 3 — 1NF check",
+          "prompt": "1NF? Alle waarden atomair?",
+          "model": "Ja, alle waarden zijn atomair → 1NF OK."
+        },
+        {
+          "id": "fa",
+          "title": "Stap 4 — Functionele afhankelijkheden",
+          "prompt": "Som de f.a. op.",
+          "model": "student_id → naam, studierichting\nvak_code → vak_naam, credits, docent_id\ndocent_id → docent_naam\n(student_id, vak_code) → score"
+        },
+        {
+          "id": "kandidaat",
+          "title": "Stap 5 — Kandidaatsleutel",
+          "prompt": "Wat is de kandidaatsleutel?",
+          "model": "(student_id, vak_code)"
+        },
+        {
+          "id": "2nf-check",
+          "title": "Stap 6 — 2NF check",
+          "prompt": "2NF? Partiële f.a.?",
+          "model": "Neen. Partiële f.a.:\n• student_id → naam, studierichting\n• vak_code → vak_naam, credits, docent_id"
+        },
+        {
+          "id": "2nf-split",
+          "title": "Stap 7 — 2NF splitsing",
+          "prompt": "Splits af in tabellen.",
+          "model": "Resultaat(student_id, vak_code, score)\nStudent(student_id, naam, studierichting)\nVak(vak_code, vak_naam, credits, docent_id, docent_naam)"
+        },
+        {
+          "id": "3nf-vak-check",
+          "title": "Stap 8 — 3NF check op Vak",
+          "prompt": "Staat Vak in 3NF? Transitieve f.a.?",
+          "model": "Neen. Transitieve f.a.: vak_code → docent_id → docent_naam."
+        },
+        {
+          "id": "3nf-vak-split",
+          "title": "Stap 9 — 3NF splitsing van Vak",
+          "prompt": "Splits Vak op.",
+          "model": "Vak(vak_code, vak_naam, credits, docent_id)\nDocent(docent_id, docent_naam)"
+        },
+        {
+          "id": "resultaat",
+          "title": "Stap 10 — Resultaat: 3NF-tabellen",
+          "prompt": "Finale 3NF-tabellen.",
+          "model": "Resultaat(student_id, vak_code, score)\nStudent(student_id, naam, studierichting)\nVak(vak_code, vak_naam, credits, docent_id)\nDocent(docent_id, docent_naam)\n\nFK: student_id → Student, vak_code → Vak, docent_id → Docent."
+        }
+      ]
+    }
+  ]
+}
