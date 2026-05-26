@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
-import data from "@/data/theory.nosql.json";
+import test1Data from "@/data/theory.nosql.json";
+import test2Data from "@/data/theory.nosql.test2.json";
 import clsx from "clsx";
 
 type MCQuestion = {
@@ -22,6 +23,17 @@ type OpenQuestion = {
 };
 type Question = MCQuestion | OpenQuestion;
 
+type TestData = {
+  title: string;
+  intro: string;
+  questions: Question[];
+};
+
+const TESTS: { id: "v1" | "v2"; label: string; data: TestData }[] = [
+  { id: "v1", label: "Test 1", data: test1Data as TestData },
+  { id: "v2", label: "Test 2", data: test2Data as TestData },
+];
+
 function normalize(s: string) {
   return s.trim().toLowerCase().replace(/[.,!?;:]/g, "").replace(/\s+/g, " ");
 }
@@ -32,40 +44,74 @@ type AnswerState =
   | { status: "wrong"; given?: string };
 
 export default function TheoryPage() {
-  const questions = data.questions as Question[];
-  const [byId, setById] = useState<Record<string, AnswerState>>({});
-  const [openInputs, setOpenInputs] = useState<Record<string, string>>({});
+  const [activeTest, setActiveTest] = useState<"v1" | "v2">("v1");
+  // Aparte answer-state per test
+  const [byTest, setByTest] = useState<Record<string, Record<string, AnswerState>>>({ v1: {}, v2: {} });
+  const [inputsByTest, setInputsByTest] = useState<Record<string, Record<string, string>>>({ v1: {}, v2: {} });
   const [showAllExplanations, setShowAllExplanations] = useState(false);
   const [filter, setFilter] = useState<"all" | "open" | "wrong" | "todo">("all");
 
+  // Test 1 status om Test 2 te ontgrendelen
+  const test1Done = useMemo(() => {
+    const t1 = TESTS[0].data;
+    const answers = byTest.v1 || {};
+    return t1.questions.every((q) => {
+      const st = answers[q.id]?.status;
+      return st === "correct" || st === "wrong";
+    });
+  }, [byTest]);
+
+  // Veilig: als gebruiker op v2 zit maar nog niet ontgrendeld → terug naar v1
+  const effectiveTest = activeTest === "v2" && !test1Done ? "v1" : activeTest;
+  const test = TESTS.find((t) => t.id === effectiveTest)!;
+  const byId = byTest[effectiveTest] || {};
+  const openInputs = inputsByTest[effectiveTest] || {};
+
   const sections = useMemo(() => {
     const map: Record<string, Question[]> = {};
-    for (const q of questions) (map[q.section] ||= []).push(q);
+    for (const q of test.data.questions) (map[q.section] ||= []).push(q);
     return map;
-  }, [questions]);
+  }, [test]);
+
+  function setAnswer(tid: string, qid: string, state: AnswerState) {
+    setByTest((s) => ({ ...s, [tid]: { ...(s[tid] || {}), [qid]: state } }));
+  }
+  function setInput(tid: string, qid: string, v: string) {
+    setInputsByTest((s) => ({ ...s, [tid]: { ...(s[tid] || {}), [qid]: v } }));
+  }
 
   function checkMc(q: MCQuestion, choice: number) {
     const ok = choice === q.answer;
-    setById((s) => ({ ...s, [q.id]: ok ? { status: "correct" } : { status: "wrong", given: q.choices[choice] } }));
+    setAnswer(effectiveTest, q.id, ok ? { status: "correct" } : { status: "wrong", given: q.choices[choice] });
   }
-
   function checkOpen(q: OpenQuestion) {
     const given = (openInputs[q.id] ?? "").trim();
     if (!given) return;
     const n = normalize(given);
     const ok = q.answer.some((a) => normalize(a) === n);
-    setById((s) => ({ ...s, [q.id]: ok ? { status: "correct" } : { status: "wrong", given } }));
+    setAnswer(effectiveTest, q.id, ok ? { status: "correct" } : { status: "wrong", given });
   }
-
   function resetQuestion(id: string) {
-    setById((s) => { const c = { ...s }; delete c[id]; return c; });
-    setOpenInputs((s) => { const c = { ...s }; delete c[id]; return c; });
+    setByTest((s) => {
+      const t = { ...(s[effectiveTest] || {}) };
+      delete t[id];
+      return { ...s, [effectiveTest]: t };
+    });
+    setInputsByTest((s) => {
+      const t = { ...(s[effectiveTest] || {}) };
+      delete t[id];
+      return { ...s, [effectiveTest]: t };
+    });
+  }
+  function resetCurrent() {
+    setByTest((s) => ({ ...s, [effectiveTest]: {} }));
+    setInputsByTest((s) => ({ ...s, [effectiveTest]: {} }));
   }
 
-  // Stats
+  const total = test.data.questions.length;
   const correct = Object.values(byId).filter((s) => s.status === "correct").length;
   const wrong = Object.values(byId).filter((s) => s.status === "wrong").length;
-  const todo = questions.length - correct - wrong;
+  const todo = total - correct - wrong;
 
   function matchesFilter(q: Question): boolean {
     const st = byId[q.id]?.status ?? "idle";
@@ -79,19 +125,46 @@ export default function TheoryPage() {
   return (
     <div className="p-4 space-y-3">
       <div className="title-bar -m-4 mb-0 justify-between">
-        <span>Theorie · {data.title}</span>
+        <span>Theorie · {test.data.title}</span>
         <span className="normal-case font-normal text-fg-dim">
-          {correct}/{questions.length} juist · {wrong} fout · {todo} open
+          {correct}/{total} juist · {wrong} fout · {todo} open
         </span>
+      </div>
+
+      {/* Test-switcher */}
+      <div className="tabbar">
+        {TESTS.map((t) => {
+          const locked = t.id === "v2" && !test1Done;
+          const active = effectiveTest === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => {
+                if (locked) return;
+                setActiveTest(t.id);
+              }}
+              disabled={locked}
+              className={clsx("tab", active && "tab-active", locked && "opacity-50 cursor-not-allowed")}
+              title={locked ? "Voltooi eerst alle vragen van Test 1" : undefined}
+            >
+              {locked ? "🔒 " : ""}{t.label}
+              {t.id === "v2" && !test1Done && <span className="ml-2 text-2xs text-fg-dim">(lock — Test 1 eerst)</span>}
+              {t.id === "v1" && test1Done && <span className="ml-2 text-2xs text-ok">✓</span>}
+            </button>
+          );
+        })}
       </div>
 
       {/* Intro */}
       <div className="pane">
         <div className="pane-header"><span>Info</span></div>
         <div className="p-3 text-sm text-fg-muted">
-          {data.intro}
+          {test.data.intro}
           <div className="mt-2 text-2xs text-fg-dim">
-            💡 Geen XP, geen leaderboard — gewoon oefenen. Vragen zijn gebaseerd op de cursus.
+            💡 Geen XP, geen leaderboard — gewoon oefenen.
+            {!test1Done && effectiveTest === "v1" && (
+              <span className="ml-1 text-warn">Beantwoord alle vragen om Test 2 vrij te spelen.</span>
+            )}
           </div>
         </div>
       </div>
@@ -100,7 +173,7 @@ export default function TheoryPage() {
       <div className="toolbar gap-2 flex-wrap">
         <span className="text-2xs uppercase tracking-wider text-fg-dim">Filter:</span>
         {([
-          ["all", `Alle (${questions.length})`],
+          ["all", `Alle (${total})`],
           ["todo", `Onbeantwoord (${todo})`],
           ["wrong", `Fout (${wrong})`],
           ["open", "Open vragen"],
@@ -122,11 +195,8 @@ export default function TheoryPage() {
           />
           Toon alle verklaringen
         </label>
-        <button
-          onClick={() => { setById({}); setOpenInputs({}); }}
-          className="btn-sm btn-ghost normal-case ml-auto"
-        >
-          ↺ Reset alles
+        <button onClick={resetCurrent} className="btn-sm btn-ghost normal-case ml-auto">
+          ↺ Reset deze test
         </button>
       </div>
 
@@ -140,12 +210,12 @@ export default function TheoryPage() {
               <span className="text-fg-dim normal-case font-normal">{visible.length} vragen</span>
             </div>
             <div className="divide-y divide-line">
-              {visible.map((q, idx) => {
+              {visible.map((q) => {
                 const state = byId[q.id]?.status ?? "idle";
                 return (
                   <div key={q.id} className="p-3 space-y-2">
                     <div className="flex items-start gap-3">
-                      <code className="font-mono text-2xs text-fg-dim shrink-0 w-10">{q.id}</code>
+                      <code className="font-mono text-2xs text-fg-dim shrink-0 w-12">{q.id}</code>
                       <div className="flex-1">
                         <div className="text-sm text-fg">
                           {q.question}
@@ -155,7 +225,8 @@ export default function TheoryPage() {
                         {q.type === "mc" ? (
                           <div className="mt-2 space-y-1">
                             {q.choices.map((c, i) => {
-                              const isChosen = state !== "idle" && byId[q.id]?.status === "wrong" && byId[q.id] && (byId[q.id] as any).given === c;
+                              const givenChoice = byId[q.id]?.status === "wrong" ? (byId[q.id] as any).given : null;
+                              const isChosen = givenChoice === c;
                               const isCorrect = state !== "idle" && i === q.answer;
                               const isWrongChoice = state === "wrong" && isChosen;
                               return (
@@ -184,7 +255,7 @@ export default function TheoryPage() {
                             <input
                               type="text"
                               value={openInputs[q.id] ?? ""}
-                              onChange={(e) => setOpenInputs((s) => ({ ...s, [q.id]: e.target.value }))}
+                              onChange={(e) => setInput(effectiveTest, q.id, e.target.value)}
                               onKeyDown={(e) => e.key === "Enter" && checkOpen(q)}
                               disabled={state !== "idle"}
                               className={clsx("input max-w-xs", state === "correct" && "border-ok", state === "wrong" && "border-err")}
@@ -221,6 +292,15 @@ export default function TheoryPage() {
           </div>
         );
       })}
+
+      {/* Footer melding bij voltooien test 1 */}
+      {effectiveTest === "v1" && test1Done && (
+        <div className="pane border-l-2 border-l-ok">
+          <div className="p-3 text-sm">
+            <strong className="text-ok">🎉 Test 1 voltooid!</strong> Test 2 is nu ontgrendeld — klik bovenaan op het tweede tabblad voor andere vragen op dezelfde stof.
+          </div>
+        </div>
+      )}
     </div>
   );
 }

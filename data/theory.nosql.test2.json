@@ -1,0 +1,359 @@
+{
+  "title": "H5 — NoSQL Test 2",
+  "intro": "Tweede ronde — andere vragen, zelfde stof. Pas beschikbaar na het voltooien van Test 1.",
+  "questions": [
+    {
+      "id": "n2-01",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welke uitspraak over NoSQL klopt NIET?",
+      "choices": [
+        "Er zijn geen joins in de querytaal",
+        "Normalisatie is niet nodig",
+        "Het garandeert sterke ACID-eigenschappen",
+        "Schema's hoeven niet vooraf vastgelegd te worden"
+      ],
+      "answer": 2,
+      "explanation": "NoSQL biedt meestal GEEN strikte ACID-garanties; dat is een sterk punt van relationele DBMS'en."
+    },
+    {
+      "id": "n2-02",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welk kenmerk hoort NIET bij NoSQL?",
+      "choices": [
+        "Open-source",
+        "Verplichte tabel-structuur met FK-constraints",
+        "Grote hoeveelheden data",
+        "Gedistribueerd"
+      ],
+      "answer": 1,
+      "explanation": "NoSQL gebruikt geen tabellen — wel verzamelingen objecten, schema-less."
+    },
+    {
+      "id": "n2-03",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Een persoonsobject heeft soms 'telefoon' als lijst en soms als enkele waarde. Welk concept illustreert dit?",
+      "choices": ["Sharding", "Schema-less", "ACID", "Replication"],
+      "answer": 1,
+      "explanation": "Schema-less = de structuur van objecten in een collection hoeft niet uniform te zijn."
+    },
+    {
+      "id": "n2-04",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welke ACID-eigenschap garandeert dat een transactie ofwel volledig ofwel helemaal niet uitgevoerd wordt?",
+      "choices": ["Atomicity", "Consistency", "Isolation", "Durability"],
+      "answer": 0,
+      "explanation": "Atomicity — een reeks wijzigingen in één keer of helemaal niet."
+    },
+    {
+      "id": "n2-05",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welke ACID-eigenschap zorgt via constraints dat primary key + foreign key + check-regels altijd kloppen?",
+      "choices": ["Atomicity", "Consistency", "Isolation", "Durability"],
+      "answer": 1,
+      "explanation": "Consistency garandeert dat data nooit tegenstrijdig is via transacties + constraints."
+    },
+    {
+      "id": "n2-06",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welke ACID-eigenschap is verantwoordelijk voor concurrency control (locking) en read consistency (snapshot)?",
+      "choices": ["Atomicity", "Consistency", "Isolation", "Durability"],
+      "answer": 2,
+      "explanation": "Isolation laat transacties onafhankelijk van elkaar lopen."
+    },
+    {
+      "id": "n2-07",
+      "section": "5.1 Wat zijn NoSQL-databases",
+      "type": "mc",
+      "question": "Welke ACID-eigenschap maakt recovery mogelijk na een crash?",
+      "choices": ["Atomicity", "Consistency", "Isolation", "Durability"],
+      "answer": 3,
+      "explanation": "Durability = transacties worden permanent opgeslagen."
+    },
+    {
+      "id": "n2-08",
+      "section": "5.2 Waarom NoSQL",
+      "type": "mc",
+      "question": "Wat is een TROEF van klassieke relationele DBMS'en?",
+      "choices": [
+        "Hoge flexibiliteit van schema",
+        "Krachtige querytaal SQL + ACID-garanties",
+        "Eenvoudige distributie",
+        "Ideaal voor ongestructureerde IoT-data"
+      ],
+      "answer": 1,
+      "explanation": "RDBMS = lange traditie, gestructureerde data, SQL, ACID."
+    },
+    {
+      "id": "n2-09",
+      "section": "5.2 Waarom NoSQL",
+      "type": "mc",
+      "question": "Voor welke toepassing leent NoSQL zich het minst?",
+      "choices": [
+        "IoT-sensoren met massale eventstream",
+        "Big data analytics op semi-gestructureerde logs",
+        "Bankboekhouding met strikte transactiegaranties",
+        "Document storage voor een CMS"
+      ],
+      "answer": 2,
+      "explanation": "Een bankboekhouding vraagt strikte ACID — daar excelleert een RDBMS, niet NoSQL."
+    },
+    {
+      "id": "n2-10",
+      "section": "5.3 Soorten NoSQL",
+      "type": "mc",
+      "question": "Welk DB-type past best bij een sociaal netwerk met 'vriend van vriend'-queries?",
+      "choices": ["Document", "Key-Value", "Graph", "Wide Column"],
+      "answer": 2,
+      "explanation": "Graph-databases (Neo4J) zijn gemaakt voor relaties tussen objecten."
+    },
+    {
+      "id": "n2-11",
+      "section": "5.3 Soorten NoSQL",
+      "type": "mc",
+      "question": "Welk DB-type is CouchDB?",
+      "choices": ["Document", "Key-Value", "Graph", "Wide Column"],
+      "answer": 0,
+      "explanation": "CouchDB is een document-database, net als MongoDB."
+    },
+    {
+      "id": "n2-12",
+      "section": "5.3 Soorten NoSQL",
+      "type": "open",
+      "question": "Welk soort NoSQL-database is Cassandra? (twee woorden, vorm: '... ...')",
+      "answer": ["wide column", "wide-column", "widecolumn"],
+      "explanation": "Cassandra is een Wide Column Store — rijen waarbij niet elke rij dezelfde kolommen heeft."
+    },
+    {
+      "id": "n2-13",
+      "section": "5.3 Soorten NoSQL",
+      "type": "open",
+      "question": "Welk soort NoSQL is Riak? (twee woorden)",
+      "answer": ["key-value", "key value", "keyvalue"],
+      "explanation": "Riak is, net als Redis, een key-value-pair database."
+    },
+    {
+      "id": "n2-14",
+      "section": "5.4 MongoDB",
+      "type": "mc",
+      "question": "Welke uitspraak over MongoDB klopt?",
+      "choices": [
+        "Het is een wide-column store",
+        "Het slaat documenten op in JSON-formaat (BSON binair)",
+        "Het is een key-value store",
+        "Het is een commerciële closed-source DB"
+      ],
+      "answer": 1,
+      "explanation": "MongoDB is open-source, document-georiënteerd en gebruikt BSON (binary JSON)."
+    },
+    {
+      "id": "n2-15",
+      "section": "5.4 MongoDB",
+      "type": "mc",
+      "question": "Wat is een 'collection' in MongoDB?",
+      "choices": [
+        "Een tabel met vaste kolommen",
+        "Een verzameling documenten",
+        "Een index op een veld",
+        "Een lijst van databases"
+      ],
+      "answer": 1,
+      "explanation": "Een collection bevat documents. Eén database heeft meerdere collections."
+    },
+    {
+      "id": "n2-16",
+      "section": "5.4 MongoDB",
+      "type": "mc",
+      "question": "Welke query telt het aantal documenten met `sex: 'M'` in de `persons`-collection?",
+      "choices": [
+        "db.persons.count('M')",
+        "db.persons.find({sex:'M'}).count()",
+        "SELECT COUNT(*) FROM persons WHERE sex='M'",
+        "db.persons.aggregate({sex:'M'})"
+      ],
+      "answer": 1,
+      "explanation": "`db.persons.find({sex:'M'}).count()` is de standaard MongoDB-syntax voor tellen na filteren."
+    },
+    {
+      "id": "n2-17",
+      "section": "5.4 MongoDB",
+      "type": "mc",
+      "question": "Wat doet `db.persons.updateMany({last_name:'Macron'}, {$set:{country:'France'}})`?",
+      "choices": [
+        "Verwijdert alle Macron-documenten",
+        "Voegt een veld `country: 'France'` toe of overschrijft het bij alle Macron-personen",
+        "Maakt een nieuwe Macron-persoon aan met country=France",
+        "Telt het aantal Macron-personen in Frankrijk"
+      ],
+      "answer": 1,
+      "explanation": "`$set` voegt het veld toe als het niet bestaat, of overschrijft het bestaande veld bij alle matchende documenten."
+    },
+    {
+      "id": "n2-18",
+      "section": "5.4 MongoDB",
+      "type": "mc",
+      "question": "Wat is het doel van een index in MongoDB?",
+      "choices": [
+        "Backup van data garanderen",
+        "Zoeken en sorteren versnellen via een look-up-table",
+        "Schema afdwingen",
+        "Data encrypteren"
+      ],
+      "answer": 1,
+      "explanation": "Een index werkt met een look-up-table: zoeken in de tabel, dan verwijzen naar het juiste document."
+    },
+    {
+      "id": "n2-19",
+      "section": "5.4 MongoDB",
+      "type": "open",
+      "question": "Welk binair documentformaat gebruikt MongoDB intern? (1 woord)",
+      "answer": ["BSON"],
+      "explanation": "BSON (Binary JSON)."
+    },
+    {
+      "id": "n2-20",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "mc",
+      "question": "Een student-document bevat een lijst `results` met `code`, `name`, `credits`, `score` per vak. Welke aanpak is dit?",
+      "choices": ["Embedden", "Verwijzen", "Sharding", "Replication"],
+      "answer": 0,
+      "explanation": "Alle vak-info zit ingebed in het student-document → embedding, met risico op redundantie."
+    },
+    {
+      "id": "n2-21",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "mc",
+      "question": "Wat is het belangrijkste risico van embedding?",
+      "choices": [
+        "Slechtere performantie",
+        "Redundantie en kans op inconsistentie",
+        "Geen indexen mogelijk",
+        "Verlies van primary keys"
+      ],
+      "answer": 1,
+      "explanation": "Dezelfde info zit op meerdere plekken — bij updates kunnen kopieën uiteenlopen."
+    },
+    {
+      "id": "n2-22",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "mc",
+      "question": "Hoe heet de techniek waarbij een student-document enkel `vak_id` opslaat in plaats van het hele vak-object?",
+      "choices": ["Embedden", "Verwijzen", "Joinen", "Sharding"],
+      "answer": 1,
+      "explanation": "Dit is verwijzen (referencing) — verwijst naar een id in een andere collection."
+    },
+    {
+      "id": "n2-23",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "mc",
+      "question": "Welk nadeel heeft verwijzen?",
+      "choices": [
+        "Veel redundantie",
+        "Aggregatie (som, gemiddelde, aantal) is ingewikkelder",
+        "Tragere writes door duplicatie",
+        "Geen ondersteuning voor indexen"
+      ],
+      "answer": 1,
+      "explanation": "Bij verwijzen is aggregatie complexer (geen joins → vaak loops in code). Voordeel: betere consistentie."
+    },
+    {
+      "id": "n2-24",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "mc",
+      "question": "Wanneer kies je BEST voor embedden?",
+      "choices": [
+        "Wanneer data sterk genormaliseerd moet zijn",
+        "Wanneer queries en inserts snel/eenvoudig moeten zijn én redundantie aanvaardbaar is",
+        "Wanneer joins essentieel zijn",
+        "Wanneer je referentiële integriteit op DB-niveau wil"
+      ],
+      "answer": 1,
+      "explanation": "Embedden = snelle reads, simpele code. Geschikt als redundantie geen probleem is."
+    },
+    {
+      "id": "n2-25",
+      "section": "5.5 Embedden of verwijzen",
+      "type": "open",
+      "question": "Welke benadering plaatst complexe gerelateerde gegevens samen in één document? (1 woord)",
+      "answer": ["embedden", "embedding", "embed"],
+      "explanation": "Embedden — complexe gegevens worden in hetzelfde document opgeslagen."
+    },
+    {
+      "id": "n2-26",
+      "section": "5.6 Replication & Sharding",
+      "type": "mc",
+      "question": "Wat is sharding vs replication?",
+      "choices": [
+        "Sharding = kopiëren, Replication = verdelen",
+        "Sharding = verdelen over nodes, Replication = kopiëren over replica-sets",
+        "Beide zijn synoniemen",
+        "Sharding = backup, Replication = encryptie"
+      ],
+      "answer": 1,
+      "explanation": "Sharding = horizontale distributie (verdelen). Replication = kopieën maken voor availability."
+    },
+    {
+      "id": "n2-27",
+      "section": "5.6 Replication & Sharding",
+      "type": "mc",
+      "question": "Welk voordeel biedt sharding?",
+      "choices": [
+        "Automatic failover",
+        "Hogere performantie via meerdere CPU's + meer schrijfruimte",
+        "Strikte ACID",
+        "Verkleining van datavolume"
+      ],
+      "answer": 1,
+      "explanation": "Sharding lost beperkte schrijfruimte op en geeft hogere performantie. Availability/failover komt van replication."
+    },
+    {
+      "id": "n2-28",
+      "section": "5.6 Replication & Sharding",
+      "type": "mc",
+      "question": "Wat ervaart een client bij gebruik van sharding?",
+      "choices": [
+        "Hij moet zelf de juiste shard kiezen",
+        "Hij ziet meerdere losse databases",
+        "Hij ziet één database (de redirecting is overhead)",
+        "Hij kan enkel lezen, niet schrijven"
+      ],
+      "answer": 2,
+      "explanation": "Voor de client = één database. De DB-laag handelt redirecting naar de juiste shard af (kleine overhead)."
+    },
+    {
+      "id": "n2-29",
+      "section": "5.6 Replication & Sharding",
+      "type": "open",
+      "question": "Hoe heet een gerepliceerde groep van database-kopieën in MongoDB? (twee woorden, Engels)",
+      "answer": ["replica set", "replica-set", "replicaset"],
+      "explanation": "Een replica set = de groep van kopieën die de database gerepliceerd opslaan."
+    },
+    {
+      "id": "n2-30",
+      "section": "5.6 Replication & Sharding",
+      "type": "open",
+      "question": "Wat is de Engelse term voor horizontale distributie van documenten over meerdere nodes? (1 woord)",
+      "answer": ["sharding"],
+      "explanation": "Sharding — verspreiden van documents uit dezelfde collection over meerdere nodes."
+    },
+    {
+      "id": "n2-31",
+      "section": "Samenvatting",
+      "type": "mc",
+      "question": "Wat is de meest correcte samenvatting van NoSQL?",
+      "choices": [
+        "Strikt ACID + relationeel + gedistribueerd",
+        "Niet ACID, wel performant, wel goed distribueerbaar",
+        "Tabel-georiënteerd met krachtige join-engine",
+        "Vervangt SQL volledig in alle situaties"
+      ],
+      "answer": 1,
+      "explanation": "NoSQL ruilt ACID-garanties in voor performantie en gedistribueerde schaalbaarheid (sharding + replication)."
+    }
+  ]
+}
