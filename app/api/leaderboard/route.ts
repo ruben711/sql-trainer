@@ -93,9 +93,12 @@ export async function POST(req: NextRequest) {
 
   const list = (await getJson<Entry[]>(KEY)) || [];
   const idx = list.findIndex((e) => e.uid === uid);
+  const existing = idx >= 0 ? list[idx] : null;
   const entry: Entry = {
     uid, name, exam, general, updatedAt: now,
-    admin: isAdmin || (idx >= 0 ? list[idx].admin : false),
+    admin: isAdmin || existing?.admin || false,
+    // Belangrijk: customTag bewaren bij re-sync, anders wordt admin-toegekende tag overschreven.
+    customTag: existing?.customTag ?? null,
   };
   if (idx >= 0) list[idx] = entry;
   else list.push(entry);
