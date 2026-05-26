@@ -329,6 +329,57 @@ table.result td.str { color: rgb(var(--sql-string)); }
 .tree-col .col-type { @apply ml-auto text-fg-dim text-2xs italic; }
 
 /* ========================================================================
+   XP TOAST  —  korte zichtbare animatie bij correcte oplossing
+   ======================================================================== */
+.xp-toast {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  padding: 1rem 1.75rem;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: rgb(var(--ok));
+  text-shadow: 0 0 24px rgb(var(--ok) / 0.7), 0 0 8px rgb(var(--ok) / 0.5);
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  animation: xp-pop 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.xp-toast .xp-sub {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  text-align: center;
+  margin-top: -0.25rem;
+  text-shadow: none;
+}
+@keyframes xp-pop {
+  0%   { opacity: 0; transform: translate(-50%, -10%) scale(0.6); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+  40%  { transform: translate(-50%, -50%) scale(1); }
+  75%  { opacity: 1; transform: translate(-50%, -90%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -160%) scale(0.95); }
+}
+
+/* ========================================================================
+   XP CHIP op /exercises lijst — toont reward per oefening
+   ======================================================================== */
+.xp-chip {
+  @apply inline-flex items-center px-1.5 h-5 text-2xs font-mono font-bold rounded-sm border;
+}
+.xp-chip.easy   { color: rgb(var(--diff-easy));   border-color: rgb(var(--diff-easy) / 0.45);   background: rgb(var(--diff-easy) / 0.10); }
+.xp-chip.medium { color: rgb(var(--diff-medium)); border-color: rgb(var(--diff-medium) / 0.45); background: rgb(var(--diff-medium) / 0.10); }
+.xp-chip.hard   { color: rgb(var(--diff-hard));   border-color: rgb(var(--diff-hard) / 0.45);   background: rgb(var(--diff-hard) / 0.10); }
+.xp-chip.insane { color: rgb(var(--diff-insane)); border-color: rgb(var(--diff-insane) / 0.55); background: rgb(var(--diff-insane) / 0.10); }
+.xp-chip.zero   { @apply text-fg-dim; }
+
+/* ========================================================================
    MISC
    ======================================================================== */
 .kbd {

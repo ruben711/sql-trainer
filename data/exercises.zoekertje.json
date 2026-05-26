@@ -1745,6 +1745,129 @@
       "Zoekertje"
     ]
   },
+
+  {
+    "id": "s2-13",
+    "chapter": "H4.3 Operatoren",
+    "title": "Datums vergelijken",
+    "difficulty": "medium",
+    "tags": ["date", "where"],
+    "prompt": "Welke gebruikers werden lid in 2023 of later? Toon gebruikersnaam en lidsinds.",
+    "solution": "SELECT gebruikersnaam, lidsinds FROM Gebruiker WHERE lidsinds >= '2023-01-01';",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s2-14",
+    "chapter": "H4.3 Operatoren",
+    "title": "Negatie met NOT LIKE",
+    "difficulty": "easy",
+    "tags": ["like", "not"],
+    "prompt": "Toon alle zoekertjes waarvan de titel NIET met een hoofdletter 'S' begint.",
+    "solution": "SELECT * FROM Zoekertje WHERE titel NOT LIKE 'S%';",
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s3-12",
+    "chapter": "H4.4 Joins",
+    "title": "CROSS JOIN",
+    "difficulty": "medium",
+    "tags": ["cross-join"],
+    "prompt": "Toon alle mogelijke combinaties van afdelingen en prijstypes (cartesiaans product). Twee kolommen: afdeling-omschrijving en prijstype-omschrijving.",
+    "solution": "SELECT a.omschrijving, p.omschrijving FROM Afdeling a CROSS JOIN Prijstype p;",
+    "relatedTables": ["Afdeling", "Prijstype"]
+  },
+  {
+    "id": "s3-13",
+    "chapter": "H4.4 Joins",
+    "title": "Self-join op biedingen",
+    "difficulty": "hard",
+    "tags": ["self-join"],
+    "prompt": "Vind alle biedingen-paren op hetzelfde zoekertje waarbij het ene bod hoger is dan het andere én ze van verschillende bieders komen. Toon zoekertjeID, lagere bieder, lager bod, hogere bieder, hoger bod. Sorteer op zoekertjeID, dan hoger bod aflopend.",
+    "solution": "SELECT b1.zoekertjeID, b1.gebruikersnaam, b1.bod, b2.gebruikersnaam, b2.bod FROM Bod b1 JOIN Bod b2 ON b1.zoekertjeID = b2.zoekertjeID AND b1.bod < b2.bod AND b1.gebruikersnaam <> b2.gebruikersnaam ORDER BY b1.zoekertjeID, b2.bod DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Bod"]
+  },
+
+  {
+    "id": "s4-11",
+    "chapter": "H4.5 Functies",
+    "title": "CAST — type-conversie",
+    "difficulty": "medium",
+    "tags": ["cast"],
+    "prompt": "Toon voor elk zoekertje met prijs: de titel en de prijs als geheel getal (CAST naar INTEGER).",
+    "solution": "SELECT titel, CAST(prijs AS INTEGER) FROM Zoekertje WHERE prijs IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s4-12",
+    "chapter": "H4.5 Functies",
+    "title": "TRIM en LOWER combineren",
+    "difficulty": "easy",
+    "tags": ["string", "trim", "lower"],
+    "prompt": "Toon de emailadressen in kleine letters, zonder spaties aan begin/einde.",
+    "solution": "SELECT LOWER(TRIM(emailadres)) FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
+  },
+
+  {
+    "id": "s5-12",
+    "chapter": "H4.6 Aggregatie",
+    "title": "COUNT(*) vs COUNT(kolom)",
+    "difficulty": "medium",
+    "tags": ["count"],
+    "prompt": "Toon op één rij: het totaal aantal zoekertjes en het aantal zoekertjes met een prijs ingevuld. Twee kolommen.",
+    "solution": "SELECT COUNT(*), COUNT(prijs) FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"],
+    "hints": ["`COUNT(*)` telt rijen; `COUNT(kolom)` telt enkel rijen waar die kolom niet NULL is."]
+  },
+  {
+    "id": "s5-13",
+    "chapter": "H4.6 Aggregatie",
+    "title": "GROUP BY meerdere kolommen",
+    "difficulty": "medium",
+    "tags": ["group-by", "multi"],
+    "prompt": "Toon per (gebruikersnaam, categorieID) het aantal zoekertjes. Sorteer op gebruikersnaam, dan categorieID.",
+    "solution": "SELECT gebruikersnaam, categorieID, COUNT(*) FROM Zoekertje GROUP BY gebruikersnaam, categorieID ORDER BY gebruikersnaam, categorieID;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s6-07",
+    "chapter": "H4.7 Verzamelingen",
+    "title": "UNION met ORDER BY",
+    "difficulty": "medium",
+    "tags": ["union", "order-by"],
+    "prompt": "Toon één lijst met alle plaatsen waar (a) een gebruiker woont of (b) waar een gebruiker die ooit een bod plaatste woont. Geen duplicaten, alfabetisch gesorteerd.",
+    "solution": "SELECT plaats FROM Gebruiker UNION SELECT g.plaats FROM Gebruiker g JOIN Bod b ON b.gebruikersnaam = g.gebruikersnaam ORDER BY plaats;",
+    "orderMatters": true,
+    "relatedTables": ["Gebruiker", "Bod"]
+  },
+
+  {
+    "id": "dml-07",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "INSERT INTO … SELECT",
+    "difficulty": "hard",
+    "tags": ["insert", "select"],
+    "prompt": "Maak een nieuwe tabel ArchiefBod met exact deze kolommen: ID (integer, primary key), bod (double), datum (varchar(10)), zoekertjeID (integer), gebruikersnaam (varchar(50)). Kopieer alle biedingen van vóór 2024-10-01 naar ArchiefBod via INSERT INTO ... SELECT. Toon daarna het aantal rijen in ArchiefBod.",
+    "solution": "CREATE TABLE ArchiefBod (ID INTEGER PRIMARY KEY, bod DOUBLE NOT NULL, datum VARCHAR(10) NOT NULL, zoekertjeID INTEGER NOT NULL, gebruikersnaam VARCHAR(50) NOT NULL); INSERT INTO ArchiefBod SELECT * FROM Bod WHERE datum < '2024-10-01'; SELECT COUNT(*) FROM ArchiefBod;",
+    "relatedTables": ["Bod"]
+  },
+
+  {
+    "id": "v1-04",
+    "chapter": "Reeks 8 Views",
+    "title": "View met aggregatie",
+    "difficulty": "medium",
+    "tags": ["view", "group-by"],
+    "prompt": "Maak een view BiedStats die per zoekertje toont: zoekertjeID, aantal biedingen, hoogste bod en gemiddeld bod. Toon daarna alle rijen uit de view, gesorteerd op aantal biedingen aflopend.",
+    "solution": "CREATE VIEW BiedStats AS SELECT zoekertjeID, COUNT(*) AS aantal, MAX(bod) AS hoogste, AVG(bod) AS gemiddeld FROM Bod GROUP BY zoekertjeID; SELECT * FROM BiedStats ORDER BY aantal DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Bod"]
+  },
+
   {
     "id": "ins-01",
     "chapter": "💀 Insane",

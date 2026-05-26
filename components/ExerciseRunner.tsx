@@ -10,6 +10,7 @@ import { useHighlight } from "@/lib/highlight";
 import { track } from "@/lib/logger";
 import { syncIfJoined } from "@/lib/leaderboardSync";
 import SolutionModal from "@/components/SolutionModal";
+import XpToast from "@/components/XpToast";
 import { HighlightedSql } from "@/lib/sqlHighlight";
 import { formatSql } from "@/lib/sqlFormat";
 import type { Exercise } from "@/lib/exercises";
@@ -28,6 +29,8 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
   const [attempts, setAttempts] = useState(0);
   const [showSolution, setShowSolution] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [xpGained, setXpGained] = useState<number>(0);
+  const [xpTrigger, setXpTrigger] = useState<number>(0);
 
   useEffect(() => {
     // Start-inhoud van de editor:
@@ -43,6 +46,7 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setGrading(null);
     setAttempts(0);
     setShowSolution(false);
+    setXpGained(0);
     setHighlight(exercise.relatedTables ?? []);
     track("exercise_view", { id: exercise.id, mode, chapter: exercise.chapter, difficulty: exercise.difficulty });
     return () => setHighlight([]);
@@ -58,7 +62,11 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setStudentResult(student);
     setGrading(grading);
     setAttempts((a) => a + 1);
-    record(mode, { exerciseId: exercise.id, correct: grading.correct, query: sql });
+    const gained = record(mode, {
+      exerciseId: exercise.id, correct: grading.correct, query: sql, difficulty: exercise.difficulty,
+    });
+    setXpGained(gained);
+    if (gained > 0) setXpTrigger(Date.now());
     track(grading.correct ? "exercise_completed" : "exercise_failed", {
       id: exercise.id, mode, attempt: attempts + 1,
       difficulty: exercise.difficulty, chapter: exercise.chapter,
@@ -146,6 +154,11 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
                 <div className="font-semibold flex items-center gap-2">
                   <span>{grading.correct ? "✓" : "✗"}</span>
                   <span>{grading.message}</span>
+                  {grading.correct && xpGained > 0 && (
+                    <span className="ml-auto chip" style={{ borderColor: "rgb(var(--ok) / 0.5)", color: "rgb(var(--ok))" }}>
+                      +{xpGained} XP
+                    </span>
+                  )}
                 </div>
                 {grading.hints.length > 0 && (
                   <ul className="mt-1.5 list-disc list-inside text-xs opacity-90 space-y-0.5">
@@ -180,6 +193,8 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
         onClose={() => setShowSolution(false)}
         onApply={(formatted) => setSql(formatted)}
       />
+
+      <XpToast amount={xpGained} trigger={xpTrigger} />
     </div>
   );
 }

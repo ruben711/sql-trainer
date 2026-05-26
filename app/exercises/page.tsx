@@ -7,6 +7,7 @@ import { useMode, MODES } from "@/lib/modes";
 import clsx from "clsx";
 
 const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk", insane: "💀 Insane" } as const;
+const diffXp: Record<Difficulty, number> = { easy: 15, medium: 25, hard: 40, insane: 0 };
 
 export default function ExercisesIndex() {
   const mode = useMode((s) => s.mode);
@@ -60,13 +61,14 @@ export default function ExercisesIndex() {
           <button
             key={d}
             onClick={() => toggleDiff(d)}
+            title={`+${diffXp[d]} XP bij eerste correcte oplossing`}
             className={clsx(
               "diff-" + d,
               "transition-opacity",
               !filter.has(d) && "opacity-30"
             )}
           >
-            {diffLabel[d]}
+            {diffLabel[d]} <span className="ml-1 text-2xs opacity-70">+{diffXp[d]}</span>
           </button>
         ))}
         <div className="divider-v" />
@@ -109,6 +111,14 @@ export default function ExercisesIndex() {
                       <span className={`diff-dot ${ex.difficulty}`} />
                       <span className="flex-1 text-xs">{ex.title}</span>
                       <span className={`diff-${ex.difficulty}`}>{diffLabel[ex.difficulty]}</span>
+                      <span
+                        className={clsx("xp-chip", ex.difficulty, diffXp[ex.difficulty] === 0 && "zero")}
+                        title={diffXp[ex.difficulty] > 0
+                          ? `+${diffXp[ex.difficulty]} XP bij eerste correcte oplossing`
+                          : "Insane geeft geen XP — puur voor de tryhards 💀"}
+                      >
+                        {diffXp[ex.difficulty] > 0 ? `+${diffXp[ex.difficulty]} XP` : "0 XP"}
+                      </span>
                       <div className="hidden md:flex gap-1">
                         {ex.tags.slice(0, 2).map((t) => <span key={t} className="chip">{t}</span>)}
                       </div>
