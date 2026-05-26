@@ -408,10 +408,9 @@
     "title": "GREATEST — grootste van twee kolommen",
     "difficulty": "medium",
     "tags": ["greatest"],
-    "prompt": "Toon voor elk zoekertje met biedingen toegestaan: de titel en de hoogste van prijs of biedenvanaf. In PostgreSQL gebruik je GREATEST(prijs, biedenvanaf); in deze SQLite-omgeving werkt MAX(prijs, biedenvanaf) als scalar.",
-    "solution": "SELECT titel, MAX(prijs, biedenvanaf) FROM Zoekertje WHERE biedenok = 1;",
-    "relatedTables": ["Zoekertje"],
-    "hints": ["Examen-versie (PG): `GREATEST(prijs, biedenvanaf)`.", "Deze trainer draait op SQLite waar `MAX(a, b)` ook als scalar werkt."]
+    "prompt": "Toon voor elk zoekertje met biedingen toegestaan: de titel en de hoogste van prijs of biedenvanaf. Gebruik GREATEST.",
+    "solution": "SELECT titel, GREATEST(prijs, biedenvanaf) FROM Zoekertje WHERE biedenok = 1;",
+    "relatedTables": ["Zoekertje"]
   },
   {
     "id": "s7-08",
@@ -419,10 +418,9 @@
     "title": "LEAST — kleinste afmeting",
     "difficulty": "medium",
     "tags": ["least"],
-    "prompt": "Toon voor elk meubelzoekertje met afmetingen (breedte, hoogte en diepte allemaal niet NULL): de titel en de kleinste afmeting van de drie. In PostgreSQL: LEAST(...); hier in SQLite: MIN(...) als scalar.",
-    "solution": "SELECT titel, MIN(breedte, hoogte, diepte) FROM Zoekertje WHERE breedte IS NOT NULL AND hoogte IS NOT NULL AND diepte IS NOT NULL;",
-    "relatedTables": ["Zoekertje"],
-    "hints": ["Examen-versie (PG): `LEAST(breedte, hoogte, diepte)`.", "In SQLite werkt `MIN(a, b, c)` ook als scalar — let op: niet te verwarren met de aggregate `MIN()`."]
+    "prompt": "Toon voor elk meubelzoekertje met afmetingen (breedte, hoogte en diepte allemaal niet NULL): de titel en de kleinste afmeting van de drie. Gebruik LEAST.",
+    "solution": "SELECT titel, LEAST(breedte, hoogte, diepte) FROM Zoekertje WHERE breedte IS NOT NULL AND hoogte IS NOT NULL AND diepte IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
   },
   {
     "id": "s7-09",
@@ -743,9 +741,9 @@
     "chapter": "Verdieping · Datums",
     "title": "Lidmaatschap jaartal",
     "difficulty": "medium",
-    "tags": ["date", "substring"],
-    "prompt": "Toon per jaar (afgeleid uit lidsinds) het aantal gebruikers dat dat jaar lid werd. Sorteer op jaar.",
-    "solution": "SELECT SUBSTR(lidsinds, 1, 4) AS jaar, COUNT(*) AS aantal FROM Gebruiker GROUP BY SUBSTR(lidsinds, 1, 4) ORDER BY jaar;",
+    "tags": ["date", "extract"],
+    "prompt": "Toon per jaar (afgeleid uit lidsinds) het aantal gebruikers dat dat jaar lid werd. Gebruik EXTRACT(YEAR FROM ...). Sorteer op jaar.",
+    "solution": "SELECT EXTRACT(YEAR FROM lidsinds) AS jaar, COUNT(*) AS aantal FROM Gebruiker GROUP BY EXTRACT(YEAR FROM lidsinds) ORDER BY jaar;",
     "orderMatters": true,
     "relatedTables": ["Gebruiker"]
   },
@@ -1016,11 +1014,10 @@
     "chapter": "H4.5 Functies",
     "title": "Jaar uit datum",
     "difficulty": "medium",
-    "tags": ["date", "substr"],
-    "prompt": "Toon voor elke gebruiker de gebruikersnaam en het jaar waarin hij/zij lid werd (afgeleid uit lidsinds 'YYYY-MM-DD'). In PostgreSQL: `EXTRACT(YEAR FROM lidsinds)`; in deze SQLite-omgeving: `SUBSTR(lidsinds, 1, 4)`.",
-    "solution": "SELECT gebruikersnaam, SUBSTR(lidsinds, 1, 4) FROM Gebruiker;",
-    "relatedTables": ["Gebruiker"],
-    "hints": ["Examen-versie (PG): `EXTRACT(YEAR FROM lidsinds)` of `TO_CHAR(lidsinds, 'YYYY')`.", "In deze trainer is lidsinds een TEXT, dus `SUBSTR` werkt."]
+    "tags": ["date", "extract"],
+    "prompt": "Toon voor elke gebruiker de gebruikersnaam en het jaar waarin hij/zij lid werd. Gebruik EXTRACT(YEAR FROM ...).",
+    "solution": "SELECT gebruikersnaam, EXTRACT(YEAR FROM lidsinds) FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
   },
   {
     "id": "s4-10",

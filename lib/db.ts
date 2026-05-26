@@ -2,6 +2,7 @@
 import initSqlJs, { Database, SqlJsStatic } from "sql.js";
 import type { Mode } from "./modes";
 import { MODES } from "./modes";
+import { pgToSqlite } from "./pgCompat";
 
 let SQL: SqlJsStatic | null = null;
 const dbCache: Partial<Record<Mode, Promise<Database>>> = {};
@@ -57,9 +58,10 @@ export async function runQuery(mode: Mode, sqlText: string): Promise<QueryResult
     const db = await getDatabase(mode);
     const t0 = performance.now();
 
-    // Soft timeout: sql.js is synchroon, dus echte cancel kan enkel via Worker.
-    // Op MVP-niveau loggen we duur en raden Worker upgrade aan als grens overschreden wordt.
-    const results = db.exec(sqlText);
+    // Transparante PG → SQLite vertaling (GREATEST/LEAST/EXTRACT/ILIKE/...)
+    const translated = pgToSqlite(sqlText);
+
+    const results = db.exec(translated);
 
     const ms = Math.round(performance.now() - t0);
     if (ms > QUERY_TIMEOUT_MS) {

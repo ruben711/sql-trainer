@@ -91,7 +91,15 @@ export function compareResults(
 }
 
 function rowKey(row: unknown[]): string {
-  return JSON.stringify(row.map((v) => (v === null ? null : typeof v === "number" ? v : String(v))));
+  return JSON.stringify(row.map((v) => {
+    if (v === null) return null;
+    if (typeof v === "number") return v;
+    const s = String(v);
+    // Numerieke strings (bv. '2024' vs 2024) gelijk behandelen — anders mismatcht
+    // SUBSTR(...) vs CAST(strftime(...) AS INTEGER) bij dezelfde semantische output.
+    if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s);
+    return s;
+  }));
 }
 function norm(s: string) { return s.trim().toLowerCase().replace(/["`]/g, ""); }
 
