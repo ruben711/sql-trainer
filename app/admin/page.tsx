@@ -401,9 +401,8 @@ function LeaderboardPanel() {
   async function recalcAllXp() {
     if (!confirm(
       "Alle XP op het leaderboard herberekenen?\n\n" +
-      "Op basis van: solved-count × gemiddelde XP per oefening.\n" +
-      "(Examen: ~24.4/solve · Algemeen: ~22.2/solve)\n\n" +
-      "Spelers krijgen de exacte waarde bij hun volgende score-sync."
+      "Formule: solved × 25 XP per oefening (flat, ongeacht moeilijkheid).\n\n" +
+      "Lokale clients krijgen de exacte waarde bij hun volgende sync."
     )) return;
     setRecalcing(true);
     setRecalcResult(null);

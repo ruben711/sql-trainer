@@ -45,15 +45,15 @@ type State = {
   recalcXp: () => void;
 };
 
-/** XP per moeilijkheid: eerste correcte poging.
- *  Insane = 0 (echt voor de fun / tryhards). Retry-XP overal 0 om gaming te ontmoedigen. */
+/** Flat XP-systeem: elke oefening geeft 25 XP bij eerste correcte oplossing.
+ *  Retry-XP = 0 om grinding te ontmoedigen. */
 export const XP_TABLE: Record<Difficulty, number> = {
-  easy:   15,
+  easy:   25,
   medium: 25,
-  hard:   40,
-  insane: 0,
+  hard:   25,
+  insane: 25,
 };
-const XP_RULES_VERSION = 4;
+const XP_RULES_VERSION = 5;
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -211,7 +211,7 @@ export const useProgress = create<State>()(
     }),
     {
       name: "sql-trainer-progress",
-      version: 4,
+      version: 5,
       migrate: (persisted: any, version) => {
         if (!persisted) return persisted;
         const ensureFields = (pm: any) => ({ ...empty, ...(pm || {}) });
@@ -227,8 +227,8 @@ export const useProgress = create<State>()(
             xpRulesVersion: 0,
           };
         }
-        if (version < 4) {
-          // XP-tabel veranderd — markeer voor recalc bij eerste mount
+        if (version < 5) {
+          // XP-tabel veranderd (nu flat 25 per oefening) — markeer voor recalc bij eerste mount
           return { ...persisted, xpRulesVersion: 0 };
         }
         return persisted;

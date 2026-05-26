@@ -16,7 +16,7 @@ export default function ModeProvider({ children }: { children: React.ReactNode }
 
   // Eenmalig: als XP-regels gewijzigd zijn → recalc met huidige tabel.
   useEffect(() => {
-    const TARGET = 4; // moet overeenkomen met XP_RULES_VERSION in store.ts
+    const TARGET = 5; // moet overeenkomen met XP_RULES_VERSION in store.ts
     const cur = useProgress.getState().xpRulesVersion ?? 0;
     if (cur < TARGET) {
       useProgress.getState().recalcXp();
