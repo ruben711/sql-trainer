@@ -329,6 +329,82 @@ table.result td.str { color: rgb(var(--sql-string)); }
 .tree-col .col-type { @apply ml-auto text-fg-dim text-2xs italic; }
 
 /* ========================================================================
+   STYLED NAME  —  per-user username effects
+   ======================================================================== */
+.styled-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  position: relative;
+  white-space: nowrap;
+}
+.styled-name.font-mono    { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.styled-name.font-serif   { font-family: Georgia, "Times New Roman", serif; }
+.styled-name.font-cursive { font-family: "Brush Script MT", "Lucida Handwriting", cursive; letter-spacing: 0.02em; }
+.styled-name.font-display { font-family: "Impact", "Bebas Neue", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.styled-name .name-text { display: inline-block; }
+.styled-name.b .name-text { font-weight: 800; }
+.styled-name.i .name-text { font-style: italic; }
+.styled-name.u .name-text { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+.styled-name.s .name-text { text-decoration: line-through; }
+
+/* Rainbow text (animated hue) */
+.styled-name.rainbow .name-text {
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow-shift 4s linear infinite;
+}
+@keyframes rainbow-shift { to { background-position: 200% center; } }
+
+/* Pulse glow */
+.styled-name.pulse .name-text { animation: name-pulse 2s ease-in-out infinite; }
+@keyframes name-pulse {
+  0%, 100% { filter: drop-shadow(0 0 0 currentColor); }
+  50%      { filter: drop-shadow(0 0 8px currentColor); }
+}
+
+/* Shake (subtle) */
+.styled-name.shake .name-text { animation: name-shake 0.6s ease-in-out infinite; display: inline-block; }
+@keyframes name-shake {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-1px) rotate(-0.6deg); }
+  40% { transform: translateX(1px) rotate(0.6deg); }
+  60% { transform: translateX(-1px) rotate(-0.4deg); }
+  80% { transform: translateX(1px) rotate(0.4deg); }
+}
+
+/* Sparkles — twee ✨ emoji's die rond de naam fonkelen */
+.styled-name.sparkle::before,
+.styled-name.sparkle::after {
+  content: "✨";
+  font-size: 0.85em;
+  position: absolute;
+  pointer-events: none;
+}
+.styled-name.sparkle::before {
+  left: -1.1em;
+  top: -0.15em;
+  animation: spark-a 1.8s ease-in-out infinite;
+}
+.styled-name.sparkle::after {
+  right: -1.1em;
+  bottom: -0.15em;
+  animation: spark-b 1.8s ease-in-out infinite;
+}
+@keyframes spark-a {
+  0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1.1) rotate(20deg); }
+}
+@keyframes spark-b {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(-15deg); }
+  50%      { opacity: 0.4; transform: scale(0.7) rotate(10deg); }
+}
+
+/* ========================================================================
    XP TOAST  —  korte zichtbare animatie bij correcte oplossing
    ======================================================================== */
 .xp-toast {

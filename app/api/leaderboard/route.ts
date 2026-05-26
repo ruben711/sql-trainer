@@ -11,6 +11,20 @@ const MAX_NAME_LEN = 24;
 
 type ModeStats = { xp: number; solved: number };
 type CustomTag = { label: string; color: string; emoji?: string };
+type NameStyle = {
+  color?: string;
+  gradient?: { from: string; to: string; angle?: number };
+  glow?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strike?: boolean;
+  font?: "default" | "mono" | "serif" | "cursive" | "display";
+  sparkle?: boolean;
+  rainbow?: boolean;
+  pulse?: boolean;
+  shake?: boolean;
+};
 type Entry = {
   uid: string;
   name: string;
@@ -19,6 +33,7 @@ type Entry = {
   updatedAt: number;
   admin?: boolean;
   customTag?: CustomTag | null;
+  nameStyle?: NameStyle | null;
 };
 
 function sanitizeName(s: string): string {
@@ -26,6 +41,34 @@ function sanitizeName(s: string): string {
     .replace(/[<>]/g, "")
     .trim()
     .slice(0, MAX_NAME_LEN) || "Anoniem";
+}
+
+function isHex(s: any): boolean {
+  return typeof s === "string" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s);
+}
+
+function sanitizeNameStyle(s: any): NameStyle | null {
+  if (!s) return null;
+  const out: NameStyle = {};
+  if (isHex(s.color)) out.color = s.color;
+  if (s.gradient && isHex(s.gradient.from) && isHex(s.gradient.to)) {
+    out.gradient = {
+      from: s.gradient.from,
+      to: s.gradient.to,
+      angle: Number.isFinite(Number(s.gradient.angle)) ? Math.max(0, Math.min(360, Math.floor(Number(s.gradient.angle)))) : 90,
+    };
+  }
+  if (isHex(s.glow)) out.glow = s.glow;
+  if (s.bold)      out.bold = true;
+  if (s.italic)    out.italic = true;
+  if (s.underline) out.underline = true;
+  if (s.strike)    out.strike = true;
+  if (["default", "mono", "serif", "cursive", "display"].includes(s.font)) out.font = s.font;
+  if (s.sparkle)   out.sparkle = true;
+  if (s.rainbow)   out.rainbow = true;
+  if (s.pulse)     out.pulse = true;
+  if (s.shake)     out.shake = true;
+  return Object.keys(out).length === 0 ? null : out;
 }
 
 function sanitizeTag(t: any): CustomTag | null {
@@ -99,6 +142,7 @@ export async function POST(req: NextRequest) {
     admin: isAdmin || existing?.admin || false,
     // Belangrijk: customTag bewaren bij re-sync, anders wordt admin-toegekende tag overschreven.
     customTag: existing?.customTag ?? null,
+    nameStyle: existing?.nameStyle ?? null,
   };
   if (idx >= 0) list[idx] = entry;
   else list.push(entry);
@@ -137,6 +181,10 @@ export async function PATCH(req: NextRequest) {
       body.customTag === null ? null :
       body.customTag !== undefined ? sanitizeTag(body.customTag) :
       cur.customTag,
+    nameStyle:
+      body.nameStyle === null ? null :
+      body.nameStyle !== undefined ? sanitizeNameStyle(body.nameStyle) :
+      cur.nameStyle,
     updatedAt: Date.now(),
   };
   await setJson(KEY, list);

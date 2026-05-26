@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAdmin } from "@/lib/adminClient";
 import CustomTag from "@/components/CustomTag";
+import StyledName, { type NameStyleData } from "@/components/StyledName";
 
 type CustomTagData = { label: string; color: string; emoji?: string };
 type Entry = {
@@ -12,6 +13,7 @@ type Entry = {
   updatedAt: number;
   admin?: boolean;
   customTag?: CustomTagData | null;
+  nameStyle?: NameStyleData | null;
 };
 
 type Notif = {
@@ -359,6 +361,7 @@ function LeaderboardPanel() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<Entry>>({});
   const [tagEditor, setTagEditor] = useState<{ uid: string; name: string; tag: CustomTagData } | null>(null);
+  const [styleEditor, setStyleEditor] = useState<{ uid: string; name: string; style: NameStyleData } | null>(null);
 
   async function load() {
     setLoading(true); setError(null);
@@ -431,6 +434,16 @@ function LeaderboardPanel() {
     else alert("Tag opslaan mislukt: " + r.status);
   }
 
+  async function saveStyle(uid: string, style: NameStyleData | null) {
+    const r = await fetch("/api/leaderboard", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uid, nameStyle: style }),
+    });
+    if (r.ok) { setStyleEditor(null); load(); }
+    else alert("Style opslaan mislukt: " + r.status);
+  }
+
   return (
     <div className="p-4 space-y-3">
       <div className="pane">
@@ -465,6 +478,7 @@ function LeaderboardPanel() {
                 <th className="text-right">General XP / Opgelost</th>
                 <th>Admin</th>
                 <th>Custom tag</th>
+                <th>Style</th>
                 <th>Acties</th>
               </tr>
             </thead>
@@ -477,7 +491,7 @@ function LeaderboardPanel() {
                       {isEd ? (
                         <input className="input h-6" defaultValue={e.name}
                           onChange={(ev) => setDraft({ ...draft, name: ev.target.value })} />
-                      ) : e.name}
+                      ) : <StyledName name={e.name} style={e.nameStyle} />}
                     </td>
                     <td className="font-mono text-fg-dim">{e.uid.slice(0, 8)}…</td>
                     <td className="num">
@@ -528,6 +542,15 @@ function LeaderboardPanel() {
                       )}
                     </td>
                     <td>
+                      <button
+                        className="btn-sm btn-ghost normal-case"
+                        onClick={() => setStyleEditor({ uid: e.uid, name: e.name, style: e.nameStyle || {} })}
+                        title="Naam-styling bewerken"
+                      >
+                        {e.nameStyle ? "✨ styled" : "+ style"}
+                      </button>
+                    </td>
+                    <td>
                       <span className="flex gap-1">
                         {isEd ? (
                           <>
@@ -559,6 +582,16 @@ function LeaderboardPanel() {
           onCancel={() => setTagEditor(null)}
           onSave={(t) => saveTag(tagEditor.uid, t)}
           onClear={() => saveTag(tagEditor.uid, null)}
+        />
+      )}
+
+      {styleEditor && (
+        <NameStyleEditorModal
+          name={styleEditor.name}
+          initial={styleEditor.style}
+          onCancel={() => setStyleEditor(null)}
+          onSave={(s) => saveStyle(styleEditor.uid, s)}
+          onClear={() => saveStyle(styleEditor.uid, null)}
         />
       )}
     </div>
@@ -889,6 +922,156 @@ function NotifyPanel() {
             })}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Name-style editor modal
+// ──────────────────────────────────────────────────────────────────
+const STYLE_PRESETS: { label: string; style: NameStyleData }[] = [
+  { label: "🌈 Rainbow", style: { rainbow: true, bold: true } },
+  { label: "✨ Sparkly Gold", style: { color: "#fde047", glow: "#facc15", sparkle: true, bold: true } },
+  { label: "🩸 Blood", style: { color: "#ef4444", glow: "#7f1d1d", bold: true, font: "display" } },
+  { label: "🌊 Ocean", style: { gradient: { from: "#0ea5e9", to: "#a78bfa", angle: 90 }, bold: true } },
+  { label: "💜 Royal", style: { gradient: { from: "#c026d3", to: "#7c3aed", angle: 120 }, glow: "#a855f7", bold: true } },
+  { label: "🔥 Inferno", style: { gradient: { from: "#fbbf24", to: "#dc2626", angle: 45 }, glow: "#f97316", pulse: true, bold: true } },
+  { label: "❄️ Frost", style: { gradient: { from: "#bae6fd", to: "#ffffff", angle: 90 }, glow: "#7dd3fc", italic: true } },
+  { label: "👻 Ghost", style: { color: "#e5e7eb", italic: true, shake: true, font: "cursive" } },
+  { label: "💀 Cursed", style: { color: "#a855f7", glow: "#7c3aed", shake: true, pulse: true, font: "display" } },
+  { label: "🟢 Matrix", style: { color: "#22c55e", glow: "#15803d", font: "mono", bold: true } },
+];
+
+function NameStyleEditorModal({
+  name, initial, onCancel, onSave, onClear,
+}: {
+  name: string;
+  initial: NameStyleData;
+  onCancel: () => void;
+  onSave: (s: NameStyleData) => void;
+  onClear: () => void;
+}) {
+  const [style, setStyle] = useState<NameStyleData>(initial);
+  const set = <K extends keyof NameStyleData>(k: K, v: NameStyleData[K]) => setStyle((s) => ({ ...s, [k]: v }));
+  const toggle = (k: keyof NameStyleData) => setStyle((s) => ({ ...s, [k]: !s[k] }));
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm p-4" onClick={onCancel}>
+      <div className="pane w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="pane-header justify-between">
+          <span>✨ Naam-stijl voor <code className="font-mono normal-case text-fg">{name}</code></span>
+          <button onClick={onCancel} className="text-fg-dim hover:text-fg normal-case font-normal text-sm">✕</button>
+        </div>
+        <div className="p-4 space-y-3">
+          <div className="text-center py-6 bg-sunken border border-line rounded-sm text-2xl">
+            <StyledName name={name} style={style} />
+          </div>
+
+          <div>
+            <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Presets</span>
+            <div className="flex flex-wrap gap-1">
+              {STYLE_PRESETS.map((p) => (
+                <button key={p.label} type="button"
+                  onClick={() => setStyle(p.style)}
+                  className="btn-sm btn normal-case font-normal"
+                >{p.label}</button>
+              ))}
+              <button type="button" onClick={() => setStyle({})} className="btn-sm btn-ghost normal-case font-normal">
+                ↺ Reset
+              </button>
+            </div>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Kleur</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <input type="color" value={style.color || "#ffffff"}
+                  onChange={(e) => { set("color", e.target.value); set("gradient", undefined); set("rainbow", undefined as any); }}
+                  className="h-8 w-12 bg-transparent border border-line rounded-sm cursor-pointer"
+                />
+                <input type="text" value={style.color ?? ""}
+                  onChange={(e) => set("color", e.target.value || undefined)}
+                  className="input font-mono w-28" maxLength={7} placeholder="#ffffff"
+                />
+                <button type="button" onClick={() => { set("color", undefined); set("gradient", undefined); }}
+                  className="btn-sm btn-ghost normal-case">Geen</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Gradient (van / naar)</span>
+              <div className="flex items-center gap-2">
+                <input type="color" value={style.gradient?.from || "#3b82f6"}
+                  onChange={(e) => { set("gradient", { from: e.target.value, to: style.gradient?.to || "#a855f7", angle: style.gradient?.angle ?? 90 }); set("color", undefined); set("rainbow", undefined as any); }}
+                  className="h-8 w-10 bg-transparent border border-line rounded-sm cursor-pointer"
+                />
+                <input type="color" value={style.gradient?.to || "#a855f7"}
+                  onChange={(e) => { set("gradient", { from: style.gradient?.from || "#3b82f6", to: e.target.value, angle: style.gradient?.angle ?? 90 }); }}
+                  className="h-8 w-10 bg-transparent border border-line rounded-sm cursor-pointer"
+                />
+                <button type="button" onClick={() => set("gradient", undefined)} className="btn-sm btn-ghost normal-case">Geen</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Glow</span>
+              <div className="flex items-center gap-2">
+                <input type="color" value={style.glow || "#ffffff"}
+                  onChange={(e) => set("glow", e.target.value)}
+                  className="h-8 w-12 bg-transparent border border-line rounded-sm cursor-pointer"
+                />
+                <button type="button" onClick={() => set("glow", undefined)} className="btn-sm btn-ghost normal-case">Geen</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Font</span>
+              <select className="input"
+                value={style.font || "default"}
+                onChange={(e) => set("font", e.target.value as any)}
+              >
+                <option value="default">Standaard</option>
+                <option value="mono">Monospace</option>
+                <option value="serif">Serif</option>
+                <option value="cursive">Cursive</option>
+                <option value="display">Display (UPPERCASE)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <span className="text-2xs uppercase tracking-wider text-fg-dim block mb-1">Effecten</span>
+            <div className="flex flex-wrap gap-1">
+              {([
+                ["bold", "B Vet"],
+                ["italic", "I Italic"],
+                ["underline", "U Onderlijn"],
+                ["strike", "S Doorstreept"],
+                ["sparkle", "✨ Sparkles"],
+                ["rainbow", "🌈 Rainbow"],
+                ["pulse", "💓 Pulse"],
+                ["shake", "🔀 Shake"],
+              ] as const).map(([k, lbl]) => (
+                <button key={k} type="button"
+                  onClick={() => toggle(k as any)}
+                  className={`btn-sm normal-case font-normal ${style[k as keyof NameStyleData] ? "btn-primary" : "btn"}`}
+                >{lbl}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2 border-t border-line">
+            <button className="btn-primary" onClick={() => onSave(style)}>✓ Opslaan</button>
+            <button className="btn" onClick={onCancel}>Annuleren</button>
+            <button
+              className="btn ml-auto"
+              style={{ borderColor: "rgb(var(--err) / 0.4)", color: "rgb(var(--err))" }}
+              onClick={() => confirm("Styling verwijderen?") && onClear()}
+            >🗑 Wissen</button>
+          </div>
+        </div>
       </div>
     </div>
   );

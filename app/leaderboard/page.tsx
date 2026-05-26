@@ -5,6 +5,7 @@ import { useProgress } from "@/lib/store";
 import { useMode, MODES } from "@/lib/modes";
 import { useAdmin } from "@/lib/adminClient";
 import CustomTag from "@/components/CustomTag";
+import StyledName, { type NameStyleData } from "@/components/StyledName";
 import clsx from "clsx";
 
 type ModeKey = "exam" | "general";
@@ -16,6 +17,7 @@ type Entry = {
   updatedAt: number;
   admin?: boolean;
   customTag?: { label: string; color: string; emoji?: string } | null;
+  nameStyle?: NameStyleData | null;
 };
 
 function levelOf(xp: number) {
@@ -218,7 +220,7 @@ export default function LeaderboardPage() {
                     </td>
                     <td className={clsx("str", me && "font-bold")}>
                       <span className="inline-flex items-center gap-1.5 flex-wrap">
-                        {e.name}
+                        <StyledName name={e.name} style={e.nameStyle} />
                         {e.admin && <span className="admin-tag">👑 ADMIN</span>}
                         {e.customTag && <CustomTag tag={e.customTag} />}
                         {me && <span className="chip">jij</span>}
