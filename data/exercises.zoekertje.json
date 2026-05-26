@@ -1654,6 +1654,72 @@
       "Zoekertje"
     ]
   },
+
+  {
+    "id": "dml-01",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "INSERT — nieuwe gebruiker",
+    "difficulty": "easy",
+    "tags": ["insert"],
+    "prompt": "Voeg een nieuwe gebruiker toe met deze waarden in deze volgorde van kolommen: gebruikersnaam='testuser', emailadres='test@x.com', paswoord='x', postcode='9000', plaats='Gent', telefoon NULL, voorwaarden=1, lidsinds='2024-12-01', emailverif=1, geslacht NULL. Toon daarna alle gebruikers uit Gent, gesorteerd op gebruikersnaam.",
+    "solution": "INSERT INTO Gebruiker VALUES ('testuser', 'test@x.com', 'x', '9000', 'Gent', NULL, 1, '2024-12-01', 1, NULL); SELECT * FROM Gebruiker WHERE plaats = 'Gent' ORDER BY gebruikersnaam;",
+    "orderMatters": true,
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "dml-02",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "INSERT — meerdere rijen tegelijk",
+    "difficulty": "easy",
+    "tags": ["insert"],
+    "prompt": "Voeg twee nieuwe kleuren toe in één INSERT-statement: (ID=8, kleur='Oranje') en (ID=9, kleur='Paars'). Toon daarna alle kleuren gesorteerd op ID.",
+    "solution": "INSERT INTO Kleur (ID, kleur) VALUES (8, 'Oranje'), (9, 'Paars'); SELECT * FROM Kleur ORDER BY ID;",
+    "orderMatters": true,
+    "relatedTables": ["Kleur"]
+  },
+  {
+    "id": "dml-03",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "UPDATE — prijs verhogen",
+    "difficulty": "medium",
+    "tags": ["update"],
+    "prompt": "Verhoog de prijs van alle zoekertjes in categorie 100 met 10%. Toon daarna titel en prijs van die zoekertjes, gesorteerd op zoekertjeID.",
+    "solution": "UPDATE Zoekertje SET prijs = prijs * 1.10 WHERE categorieID = 100; SELECT titel, prijs FROM Zoekertje WHERE categorieID = 100 ORDER BY zoekertjeID;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "dml-04",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "UPDATE — meerdere kolommen tegelijk",
+    "difficulty": "medium",
+    "tags": ["update", "set"],
+    "prompt": "Zet voor alle zoekertjes van gebruiker 'lucas': biedenok op 0 en ophalen op 1. Toon daarna titel, biedenok en ophalen van lucas' zoekertjes, gesorteerd op zoekertjeID.",
+    "solution": "UPDATE Zoekertje SET biedenok = 0, ophalen = 1 WHERE gebruikersnaam = 'lucas'; SELECT titel, biedenok, ophalen FROM Zoekertje WHERE gebruikersnaam = 'lucas' ORDER BY zoekertjeID;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "dml-05",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "DELETE — eenvoudige conditie",
+    "difficulty": "medium",
+    "tags": ["delete"],
+    "prompt": "Verwijder alle biedingen lager dan 50 euro. Toon daarna het aantal overgebleven biedingen.",
+    "solution": "DELETE FROM Bod WHERE bod < 50; SELECT COUNT(*) FROM Bod;",
+    "relatedTables": ["Bod"]
+  },
+  {
+    "id": "dml-06",
+    "chapter": "DML · INSERT / UPDATE / DELETE",
+    "title": "DELETE — met subquery",
+    "difficulty": "hard",
+    "tags": ["delete", "subquery"],
+    "prompt": "Verwijder alle biedingen op zoekertjes die niet verzonden kunnen worden (verzenden = 0). Toon daarna het totaal aantal overgebleven biedingen.",
+    "solution": "DELETE FROM Bod WHERE zoekertjeID IN (SELECT zoekertjeID FROM Zoekertje WHERE verzenden = 0); SELECT COUNT(*) FROM Bod;",
+    "relatedTables": ["Bod", "Zoekertje"]
+  },
+
   {
     "id": "ins-01",
     "chapter": "💀 Insane",
