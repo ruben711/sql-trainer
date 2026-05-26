@@ -395,6 +395,33 @@ function LeaderboardPanel() {
     if (r.ok) load();
   }
 
+  const [recalcing, setRecalcing] = useState(false);
+  const [recalcResult, setRecalcResult] = useState<string | null>(null);
+
+  async function recalcAllXp() {
+    if (!confirm(
+      "Alle XP op het leaderboard herberekenen?\n\n" +
+      "Op basis van: solved-count × gemiddelde XP per oefening.\n" +
+      "(Examen: ~24.4/solve · Algemeen: ~22.2/solve)\n\n" +
+      "Spelers krijgen de exacte waarde bij hun volgende score-sync."
+    )) return;
+    setRecalcing(true);
+    setRecalcResult(null);
+    try {
+      const r = await fetch("/api/admin/leaderboard/recalc", { method: "POST" });
+      const j = await r.json();
+      if (!j.ok) { setRecalcResult("❌ " + (j.error || r.status)); }
+      else {
+        setRecalcResult(`✓ ${j.changed} van ${j.total} spelers bijgewerkt`);
+        load();
+      }
+    } catch (e: any) {
+      setRecalcResult("❌ " + String(e?.message ?? e));
+    } finally {
+      setRecalcing(false);
+    }
+  }
+
   async function saveTag(uid: string, tag: CustomTagData | null) {
     const r = await fetch("/api/leaderboard", {
       method: "PATCH",
@@ -410,8 +437,23 @@ function LeaderboardPanel() {
       <div className="pane">
         <div className="pane-header">
           <span>Spelers ({entries.length})</span>
-          <button onClick={load} className="normal-case font-normal text-fg-muted hover:text-fg">↻ Refresh</button>
+          <span className="normal-case font-normal flex items-center gap-2">
+            <button
+              onClick={recalcAllXp}
+              disabled={recalcing}
+              className="btn-sm btn"
+              title="Herbereken XP voor alle spelers via solved-count × gemiddelde XP per oefening"
+            >
+              {recalcing ? "Bezig…" : "🧮 Recalc XP"}
+            </button>
+            <button onClick={load} className="text-fg-muted hover:text-fg">↻ Refresh</button>
+          </span>
         </div>
+        {recalcResult && (
+          <div className={recalcResult.startsWith("✓") ? "feedback-ok m-0" : "feedback-err m-0"}>
+            {recalcResult}
+          </div>
+        )}
         {loading && <p className="p-4 text-sm text-fg-dim">Laden…</p>}
         {error && <div className="feedback-err m-0">{error}</div>}
         {!loading && !error && (
