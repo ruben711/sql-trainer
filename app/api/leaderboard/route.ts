@@ -19,11 +19,16 @@ type NameStyle = {
   italic?: boolean;
   underline?: boolean;
   strike?: boolean;
-  font?: "default" | "mono" | "serif" | "cursive" | "display";
+  font?: "default" | "mono" | "serif" | "cursive" | "display" | "minecraft" | "terminal";
   sparkle?: boolean;
   rainbow?: boolean;
   pulse?: boolean;
   shake?: boolean;
+  snow?: boolean;
+  orbit?: boolean;
+  fire?: boolean;
+  stars?: boolean;
+  hearts?: boolean;
 };
 type Entry = {
   uid: string;
@@ -63,11 +68,16 @@ function sanitizeNameStyle(s: any): NameStyle | null {
   if (s.italic)    out.italic = true;
   if (s.underline) out.underline = true;
   if (s.strike)    out.strike = true;
-  if (["default", "mono", "serif", "cursive", "display"].includes(s.font)) out.font = s.font;
-  if (s.sparkle)   out.sparkle = true;
-  if (s.rainbow)   out.rainbow = true;
-  if (s.pulse)     out.pulse = true;
-  if (s.shake)     out.shake = true;
+  if (["default", "mono", "serif", "cursive", "display", "minecraft", "terminal"].includes(s.font)) out.font = s.font;
+  if (s.sparkle) out.sparkle = true;
+  if (s.rainbow) out.rainbow = true;
+  if (s.pulse)   out.pulse = true;
+  if (s.shake)   out.shake = true;
+  if (s.snow)    out.snow = true;
+  if (s.orbit)   out.orbit = true;
+  if (s.fire)    out.fire = true;
+  if (s.stars)   out.stars = true;
+  if (s.hearts)  out.hearts = true;
   return Object.keys(out).length === 0 ? null : out;
 }
 

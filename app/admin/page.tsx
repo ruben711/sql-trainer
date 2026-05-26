@@ -932,15 +932,20 @@ function NotifyPanel() {
 // ──────────────────────────────────────────────────────────────────
 const STYLE_PRESETS: { label: string; style: NameStyleData }[] = [
   { label: "🌈 Rainbow", style: { rainbow: true, bold: true } },
-  { label: "✨ Sparkly Gold", style: { color: "#fde047", glow: "#facc15", sparkle: true, bold: true } },
-  { label: "🩸 Blood", style: { color: "#ef4444", glow: "#7f1d1d", bold: true, font: "display" } },
-  { label: "🌊 Ocean", style: { gradient: { from: "#0ea5e9", to: "#a78bfa", angle: 90 }, bold: true } },
-  { label: "💜 Royal", style: { gradient: { from: "#c026d3", to: "#7c3aed", angle: 120 }, glow: "#a855f7", bold: true } },
-  { label: "🔥 Inferno", style: { gradient: { from: "#fbbf24", to: "#dc2626", angle: 45 }, glow: "#f97316", pulse: true, bold: true } },
-  { label: "❄️ Frost", style: { gradient: { from: "#bae6fd", to: "#ffffff", angle: 90 }, glow: "#7dd3fc", italic: true } },
-  { label: "👻 Ghost", style: { color: "#e5e7eb", italic: true, shake: true, font: "cursive" } },
-  { label: "💀 Cursed", style: { color: "#a855f7", glow: "#7c3aed", shake: true, pulse: true, font: "display" } },
-  { label: "🟢 Matrix", style: { color: "#22c55e", glow: "#15803d", font: "mono", bold: true } },
+  { label: "✨ Sparkly Gold", style: { color: "#ca8a04", glow: "#facc15", sparkle: true, bold: true } },
+  { label: "🩸 Blood", style: { color: "#dc2626", glow: "#7f1d1d", bold: true, font: "display" } },
+  { label: "🌊 Ocean", style: { gradient: { from: "#0284c7", to: "#7c3aed", angle: 90 }, bold: true } },
+  { label: "💜 Royal", style: { gradient: { from: "#a21caf", to: "#6d28d9", angle: 120 }, glow: "#a855f7", bold: true } },
+  { label: "🔥 Inferno", style: { gradient: { from: "#ea580c", to: "#b91c1c", angle: 45 }, glow: "#f97316", pulse: true, bold: true, fire: true } },
+  { label: "❄️ Frost", style: { gradient: { from: "#0ea5e9", to: "#1e3a8a", angle: 90 }, glow: "#7dd3fc", italic: true, snow: true } },
+  { label: "👻 Ghost", style: { color: "#475569", italic: true, shake: true, font: "cursive" } },
+  { label: "💀 Cursed", style: { color: "#7c3aed", glow: "#5b21b6", shake: true, pulse: true, font: "display" } },
+  { label: "🟢 Matrix", style: { color: "#16a34a", glow: "#14532d", font: "terminal", bold: true } },
+  { label: "🟫 Minecraft", style: { color: "#15803d", font: "minecraft", bold: true } },
+  { label: "⚡ Orbit Storm", style: { gradient: { from: "#06b6d4", to: "#3b82f6", angle: 90 }, glow: "#22d3ee", orbit: true, bold: true } },
+  { label: "🌟 Star God", style: { gradient: { from: "#fbbf24", to: "#f59e0b", angle: 90 }, glow: "#fde047", stars: true, bold: true } },
+  { label: "💖 Sweetheart", style: { color: "#db2777", glow: "#ec4899", hearts: true, italic: true, font: "cursive" } },
+  { label: "🧊 Snowflake", style: { gradient: { from: "#0891b2", to: "#1e3a8a", angle: 90 }, glow: "#67e8f9", snow: true, bold: true } },
 ];
 
 function NameStyleEditorModal({
@@ -1037,6 +1042,8 @@ function NameStyleEditorModal({
                 <option value="serif">Serif</option>
                 <option value="cursive">Cursive</option>
                 <option value="display">Display (UPPERCASE)</option>
+                <option value="minecraft">🟫 Minecraft (Press Start 2P)</option>
+                <option value="terminal">▷ Terminal (VT323)</option>
               </select>
             </div>
           </div>
@@ -1053,6 +1060,11 @@ function NameStyleEditorModal({
                 ["rainbow", "🌈 Rainbow"],
                 ["pulse", "💓 Pulse"],
                 ["shake", "🔀 Shake"],
+                ["snow", "❄ Sneeuw"],
+                ["orbit", "● Orbit"],
+                ["fire", "🔥 Vuur"],
+                ["stars", "⭐ Sterren"],
+                ["hearts", "💕 Hartjes"],
               ] as const).map(([k, lbl]) => (
                 <button key={k} type="button"
                   onClick={() => toggle(k as any)}

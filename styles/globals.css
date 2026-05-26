@@ -337,11 +337,21 @@ table.result td.str { color: rgb(var(--sql-string)); }
   gap: 0.25rem;
   position: relative;
   white-space: nowrap;
+  padding: 0 0.1em;
 }
-.styled-name.font-mono    { font-family: "JetBrains Mono", ui-monospace, monospace; }
-.styled-name.font-serif   { font-family: Georgia, "Times New Roman", serif; }
-.styled-name.font-cursive { font-family: "Brush Script MT", "Lucida Handwriting", cursive; letter-spacing: 0.02em; }
-.styled-name.font-display { font-family: "Impact", "Bebas Neue", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.styled-name.font-mono      { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.styled-name.font-serif     { font-family: Georgia, "Times New Roman", serif; }
+.styled-name.font-cursive   { font-family: "Brush Script MT", "Lucida Handwriting", cursive; letter-spacing: 0.02em; }
+.styled-name.font-display   { font-family: "Impact", "Bebas Neue", sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.styled-name.font-minecraft { font-family: "Press Start 2P", "VT323", monospace; font-size: 0.75em; letter-spacing: 0.05em; }
+.styled-name.font-terminal  { font-family: "VT323", "Courier New", monospace; font-size: 1.15em; letter-spacing: 0.02em; }
+
+/* LIGHT-MODE LEESBAARHEID: subtiele donkere outline rond gestylede namen
+   zodat lichte kleuren niet wegvallen op witte achtergrond */
+.light .styled-name .name-text {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.6px rgba(0, 0, 0, 0.55);
+}
 
 .styled-name .name-text { display: inline-block; }
 .styled-name.b .name-text { font-weight: 800; }
@@ -402,6 +412,76 @@ table.result td.str { color: rgb(var(--sql-string)); }
 @keyframes spark-b {
   0%, 100% { opacity: 1; transform: scale(1) rotate(-15deg); }
   50%      { opacity: 0.4; transform: scale(0.7) rotate(10deg); }
+}
+
+/* ── Particle layer (gedeelde positioning voor snow/orbit/stars/hearts/fire) */
+.styled-name .particle {
+  position: absolute;
+  font-size: 0.7em;
+  pointer-events: none;
+  z-index: 1;
+  -webkit-text-stroke: 0 !important;
+  line-height: 1;
+}
+
+/* Snow ❄ — valt naar beneden */
+.styled-name.snow { padding: 0.6em 0.2em 0.6em; }
+.styled-name.snow .particle {
+  top: -0.4em;
+  animation: snow-fall 3s linear infinite;
+}
+@keyframes snow-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(2.4em) rotate(180deg); opacity: 0; }
+}
+
+/* Stars ⭐ — fonkelen op willekeurige plekken */
+.styled-name.stars .particle {
+  animation: star-twinkle 1.8s ease-in-out infinite;
+}
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+
+/* Hearts 💕 — drijven omhoog */
+.styled-name.hearts { padding: 0.4em 0.2em 0.4em; }
+.styled-name.hearts .particle {
+  bottom: -0.4em;
+  animation: heart-rise 2.6s ease-in infinite;
+}
+@keyframes heart-rise {
+  0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(-2.2em) scale(1) rotate(15deg); opacity: 0; }
+}
+
+/* Fire 🔥 — onder de naam, flikkert */
+.styled-name.fire { padding-bottom: 0.5em; }
+.styled-name.fire .particle.fire-p {
+  bottom: -0.3em;
+  font-size: 0.9em;
+  animation: fire-flicker 0.45s ease-in-out infinite alternate;
+}
+@keyframes fire-flicker {
+  0%   { transform: translateY(0) scaleY(1); opacity: 0.85; filter: hue-rotate(0deg); }
+  100% { transform: translateY(-2px) scaleY(1.15); opacity: 1; filter: hue-rotate(-10deg); }
+}
+
+/* Orbit ●⚡ — bolletjes draaien rond de naam */
+.styled-name.orbit { padding: 0 1.6em; }
+.styled-name.orbit .particle.orbit-p {
+  top: 50%; left: 50%;
+  font-size: 0.55em;
+  animation: orbit-anim 2.4s linear infinite;
+  text-shadow: 0 0 6px currentColor;
+}
+@keyframes orbit-anim {
+  from { transform: translate(-50%, -50%) rotate(0deg)   translateX(1.7em) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg) translateX(1.7em) rotate(-360deg); }
 }
 
 /* ========================================================================
