@@ -14,7 +14,7 @@ import { HighlightedSql } from "@/lib/sqlHighlight";
 import { formatSql } from "@/lib/sqlFormat";
 import type { Exercise } from "@/lib/exercises";
 
-const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
+const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk", insane: "💀 Insane" } as const;
 
 export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exercise; onSolved?: () => void }) {
   const mode = useMode((s) => s.mode);

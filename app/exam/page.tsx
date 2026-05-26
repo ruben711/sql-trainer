@@ -16,7 +16,7 @@ import Link from "next/link";
 const DEFAULT_MINUTES = 30;
 const DEFAULT_N = 8;
 
-const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
+const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk", insane: "💀 Insane" } as const;
 
 type Answer = { exerciseId: string; sql: string; correct: boolean };
 

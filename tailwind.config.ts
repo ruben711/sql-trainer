@@ -39,6 +39,7 @@ const config: Config = {
         "diff-easy":   "rgb(var(--diff-easy) / <alpha-value>)",
         "diff-medium": "rgb(var(--diff-medium) / <alpha-value>)",
         "diff-hard":   "rgb(var(--diff-hard) / <alpha-value>)",
+        "diff-insane": "rgb(var(--diff-insane) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "Segoe UI", "Roboto"],

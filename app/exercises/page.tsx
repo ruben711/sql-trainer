@@ -6,13 +6,13 @@ import { useProgress } from "@/lib/store";
 import { useMode, MODES } from "@/lib/modes";
 import clsx from "clsx";
 
-const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } as const;
+const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk", insane: "💀 Insane" } as const;
 
 export default function ExercisesIndex() {
   const mode = useMode((s) => s.mode);
   const chs = byChapter(mode);
   const solved = useProgress((s) => s.byMode[mode].solved);
-  const [filter, setFilter] = useState<Set<Difficulty>>(new Set(["easy", "medium", "hard"]));
+  const [filter, setFilter] = useState<Set<Difficulty>>(new Set(["easy", "medium", "hard", "insane"]));
   const [search, setSearch] = useState("");
   const [onlyOpen, setOnlyOpen] = useState(false);
 
@@ -56,7 +56,7 @@ export default function ExercisesIndex() {
         />
         <div className="divider-v" />
         <span className="text-2xs uppercase tracking-wider text-fg-dim">Moeilijkheid:</span>
-        {(["easy", "medium", "hard"] as const).map((d) => (
+        {(["easy", "medium", "hard", "insane"] as const).map((d) => (
           <button
             key={d}
             onClick={() => toggleDiff(d)}

@@ -39,6 +39,7 @@
   --diff-easy:   52 211 153;
   --diff-medium: 251 191 36;
   --diff-hard:   248 113 113;
+  --diff-insane: 217 70 239;   /* fuchsia */
 
   /* SQL syntax (alleen voor Monaco custom theme, niet via Tailwind) */
   --sql-keyword: #569cd6;
@@ -82,6 +83,7 @@
   --diff-easy:   16 122 87;
   --diff-medium: 161 98 7;
   --diff-hard:   185 28 28;
+  --diff-insane: 134 25 143;
 
   --sql-keyword: #0000ff;
   --sql-fn:      #795e26;
@@ -254,11 +256,25 @@ body {
 .diff-easy   { @apply diff; color: rgb(var(--diff-easy));   border-color: rgb(var(--diff-easy) / 0.45);   background: rgb(var(--diff-easy) / 0.10); }
 .diff-medium { @apply diff; color: rgb(var(--diff-medium)); border-color: rgb(var(--diff-medium) / 0.45); background: rgb(var(--diff-medium) / 0.10); }
 .diff-hard   { @apply diff; color: rgb(var(--diff-hard));   border-color: rgb(var(--diff-hard) / 0.45);   background: rgb(var(--diff-hard) / 0.10); }
+.diff-insane {
+  @apply diff;
+  color: #fdf2ff;
+  border-color: rgb(var(--diff-insane) / 0.8);
+  background: linear-gradient(135deg, rgb(var(--diff-insane) / 0.55), rgb(var(--err) / 0.35));
+  box-shadow: 0 0 0 1px rgb(var(--diff-insane) / 0.4), 0 0 10px rgb(var(--diff-insane) / 0.45);
+  text-shadow: 0 0 6px rgb(var(--diff-insane) / 0.85);
+  animation: insane-pulse 2.4s ease-in-out infinite;
+}
+@keyframes insane-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgb(var(--diff-insane) / 0.4), 0 0 10px rgb(var(--diff-insane) / 0.45); }
+  50%      { box-shadow: 0 0 0 1px rgb(var(--diff-insane) / 0.55), 0 0 18px rgb(var(--diff-insane) / 0.7); }
+}
 
 .diff-dot   { @apply inline-block w-1.5 h-1.5 rounded-full; }
 .diff-dot.easy   { background: rgb(var(--diff-easy)); }
 .diff-dot.medium { background: rgb(var(--diff-medium)); }
 .diff-dot.hard   { background: rgb(var(--diff-hard)); }
+.diff-dot.insane { background: rgb(var(--diff-insane)); box-shadow: 0 0 6px rgb(var(--diff-insane)); }
 
 /* ========================================================================
    TABS (query tabs in playground)

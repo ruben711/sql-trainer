@@ -20,7 +20,7 @@ export default function Dashboard() {
       if (state.solved[e.id]) acc[e.difficulty].done++;
       return acc;
     },
-    { easy: { done: 0, total: 0 }, medium: { done: 0, total: 0 }, hard: { done: 0, total: 0 } }
+    { easy: { done: 0, total: 0 }, medium: { done: 0, total: 0 }, hard: { done: 0, total: 0 }, insane: { done: 0, total: 0 } }
   );
 
   return (
@@ -52,10 +52,10 @@ export default function Dashboard() {
       <div className="pane">
         <div className="pane-header"><span>Voortgang per moeilijkheid</span></div>
         <div className="p-3 space-y-2">
-          {(["easy", "medium", "hard"] as const).map((d) => {
+          {(["easy", "medium", "hard", "insane"] as const).map((d) => {
             const { done, total } = byDiff[d];
             const pct = total > 0 ? (done / total) * 100 : 0;
-            const label = d === "easy" ? "Makkelijk" : d === "medium" ? "Gemiddeld" : "Moeilijk";
+            const label = d === "easy" ? "Makkelijk" : d === "medium" ? "Gemiddeld" : d === "hard" ? "Moeilijk" : "💀 Insane";
             return (
               <div key={d} className="flex items-center gap-3">
                 <span className={`diff-${d} w-24 justify-center`}>{label}</span>

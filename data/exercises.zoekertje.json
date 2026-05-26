@@ -1031,23 +1031,6 @@
     ]
   },
   {
-    "id": "x-20",
-    "chapter": "Verdieping · CASE in aggregatie",
-    "title": "Verzendquota per categorie",
-    "difficulty": "hard",
-    "tags": [
-      "case",
-      "join",
-      "group-by"
-    ],
-    "prompt": "Toon per categorie de omschrijving en het aandeel (percentage als geheel getal) van zoekertjes dat verzonden kan worden.",
-    "solution": "SELECT c.omschrijving, CAST(100.0 * SUM(CASE WHEN z.verzenden = 1 THEN 1 ELSE 0 END) / COUNT(*) AS INTEGER) AS percent FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID GROUP BY c.ID, c.omschrijving;",
-    "relatedTables": [
-      "Categorie",
-      "Zoekertje"
-    ]
-  },
-  {
     "id": "x-21",
     "chapter": "Verdieping · Datums",
     "title": "Biedingen in november 2024",
@@ -1669,6 +1652,99 @@
     "orderMatters": true,
     "relatedTables": [
       "Zoekertje"
+    ]
+  },
+  {
+    "id": "ins-01",
+    "chapter": "💀 Insane",
+    "title": "Op één na duurste zoekertje per categorie",
+    "difficulty": "insane",
+    "tags": [
+      "subquery",
+      "correlated",
+      "max"
+    ],
+    "prompt": "Toon per categorie (omschrijving) de titel en prijs van het op-één-na duurste zoekertje. Categorieën met minder dan 2 zoekertjes met prijs moet je negeren. Geen window-functies of CTE gebruiken.",
+    "solution": "SELECT c.omschrijving, z.titel, z.prijs FROM Zoekertje z JOIN Categorie c ON c.ID = z.categorieID WHERE z.prijs IS NOT NULL AND z.prijs = (SELECT MAX(z2.prijs) FROM Zoekertje z2 WHERE z2.categorieID = z.categorieID AND z2.prijs IS NOT NULL AND z2.prijs < (SELECT MAX(z3.prijs) FROM Zoekertje z3 WHERE z3.categorieID = z.categorieID AND z3.prijs IS NOT NULL));",
+    "relatedTables": [
+      "Zoekertje",
+      "Categorie"
+    ]
+  },
+  {
+    "id": "ins-02",
+    "chapter": "💀 Insane",
+    "title": "Onderboden zoekertjes",
+    "difficulty": "insane",
+    "tags": [
+      "exists",
+      "not-exists",
+      "all"
+    ],
+    "prompt": "Toon de titel en prijs van zoekertjes met minstens één bod, waar ALLE biedingen strikt onder de vraagprijs liggen. Negeer zoekertjes zonder prijs en zonder biedingen.",
+    "solution": "SELECT z.titel, z.prijs FROM Zoekertje z WHERE z.prijs IS NOT NULL AND EXISTS (SELECT 1 FROM Bod b WHERE b.zoekertjeID = z.zoekertjeID) AND NOT EXISTS (SELECT 1 FROM Bod b WHERE b.zoekertjeID = z.zoekertjeID AND b.bod >= z.prijs);",
+    "relatedTables": [
+      "Zoekertje",
+      "Bod"
+    ]
+  },
+  {
+    "id": "ins-03",
+    "chapter": "💀 Insane",
+    "title": "Universele bieders",
+    "difficulty": "insane",
+    "tags": [
+      "division",
+      "not-exists",
+      "double-negation"
+    ],
+    "prompt": "Welke gebruikers hebben minstens één zoekertje EN hebben geboden in elke categorie waarin ze zelf een zoekertje hebben? (Relationele divisie via dubbele NOT EXISTS.) Toon de gebruikersnaam.",
+    "solution": "SELECT g.gebruikersnaam FROM Gebruiker g WHERE EXISTS (SELECT 1 FROM Zoekertje zx WHERE zx.gebruikersnaam = g.gebruikersnaam) AND NOT EXISTS (SELECT 1 FROM Zoekertje z WHERE z.gebruikersnaam = g.gebruikersnaam AND NOT EXISTS (SELECT 1 FROM Bod b JOIN Zoekertje z2 ON z2.zoekertjeID = b.zoekertjeID WHERE b.gebruikersnaam = g.gebruikersnaam AND z2.categorieID = z.categorieID));",
+    "relatedTables": [
+      "Gebruiker",
+      "Zoekertje",
+      "Bod"
+    ],
+    "hints": [
+      "Dit is een 'voor alle X bestaat Y' patroon — in SQL: NOT EXISTS (X waar NOT EXISTS Y)."
+    ]
+  },
+  {
+    "id": "ins-04",
+    "chapter": "💀 Insane",
+    "title": "Wederzijdse bieders",
+    "difficulty": "insane",
+    "tags": [
+      "self-join",
+      "exists",
+      "pairs"
+    ],
+    "prompt": "Vind koppels gebruikersnamen (A, B) waarbij A geboden heeft op een zoekertje van B EN B geboden heeft op een zoekertje van A. Toon elk koppel slechts één keer (alfabetisch geordend zodat A < B). Twee kolommen.",
+    "solution": "SELECT DISTINCT b1.gebruikersnaam AS a, z1.gebruikersnaam AS b FROM Bod b1 JOIN Zoekertje z1 ON z1.zoekertjeID = b1.zoekertjeID WHERE b1.gebruikersnaam < z1.gebruikersnaam AND EXISTS (SELECT 1 FROM Bod b2 JOIN Zoekertje z2 ON z2.zoekertjeID = b2.zoekertjeID WHERE b2.gebruikersnaam = z1.gebruikersnaam AND z2.gebruikersnaam = b1.gebruikersnaam);",
+    "relatedTables": [
+      "Bod",
+      "Zoekertje"
+    ],
+    "hints": [
+      "Voorwaarde `b1.gebruikersnaam < z1.gebruikersnaam` voorkomt duplicaten en zelf-paren."
+    ]
+  },
+  {
+    "id": "ins-05",
+    "chapter": "💀 Insane",
+    "title": "Trots van de categorie",
+    "difficulty": "insane",
+    "tags": [
+      "correlated",
+      "m2n",
+      "max"
+    ],
+    "prompt": "Toon de omschrijving van categorieën waarvan het duurste zoekertje minstens 2 verschillende materialen heeft. Negeer categorieën zonder zoekertjes met prijs.",
+    "solution": "SELECT DISTINCT c.omschrijving FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID WHERE z.prijs IS NOT NULL AND z.prijs = (SELECT MAX(z2.prijs) FROM Zoekertje z2 WHERE z2.categorieID = c.ID AND z2.prijs IS NOT NULL) AND (SELECT COUNT(DISTINCT mz.materiaalID) FROM Materiaal_Zoekertje mz WHERE mz.zoekertjeID = z.zoekertjeID) >= 2;",
+    "relatedTables": [
+      "Categorie",
+      "Zoekertje",
+      "Materiaal_Zoekertje"
     ]
   }
 ]

@@ -1,6 +1,6 @@
 import { MODES, type Mode } from "./modes";
 
-export type Difficulty = "easy" | "medium" | "hard";
+export type Difficulty = "easy" | "medium" | "hard" | "insane";
 
 export type Exercise = {
   id: string;
