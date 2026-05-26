@@ -299,6 +299,12 @@ table.result thead th {
 table.result tbody td {
   @apply px-2 py-1 border-b border-line/60 border-r border-r-line/60 align-top whitespace-nowrap text-fg;
 }
+/* Variant die wel mag wrappen (voor sample-data in nauwe panels) */
+table.result.wrap thead th,
+table.result.wrap tbody td { white-space: normal; word-break: break-word; }
+table.result.wrap { font-size: 10.5px; line-height: 1.3; }
+table.result.wrap thead th { padding: 4px 4px; }
+table.result.wrap tbody td { padding: 3px 4px; }
 table.result tbody tr:nth-child(even) td { background: rgb(var(--pane) / 0.4); }
 table.result tbody tr:hover td { background: rgb(var(--brand) / 0.06); }
 table.result td.null { @apply text-fg-dim italic; }

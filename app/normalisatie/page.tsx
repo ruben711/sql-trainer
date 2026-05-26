@@ -101,9 +101,9 @@ export default function NormalisatiePage() {
       </div>
 
       {/* Twee koloms layout op desktop: opgave sticky links, stappen rechts */}
-      <div className="grid xl:grid-cols-[400px_1fr] gap-3 items-start">
+      <div className="grid xl:grid-cols-[480px_1fr] 2xl:grid-cols-[560px_1fr] gap-3 items-start">
         {/* Sticky opgave-pane */}
-        <aside className="xl:sticky xl:top-3 xl:self-start xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
+        <aside className="xl:sticky xl:top-3 xl:self-start xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto min-w-0">
           <div className="pane">
             <div className="pane-header"><span>Opgave — {ex.title}</span></div>
             <div className="p-4 space-y-3 text-sm">
@@ -134,18 +134,16 @@ export default function NormalisatiePage() {
               {ex.sampleTable && (
                 <div>
                   <div className="text-2xs uppercase tracking-wider text-fg-dim mb-1">Voorbeelddata</div>
-                  <div className="overflow-x-auto">
-                    <table className="result">
-                      <thead>
-                        <tr>{ex.sampleTable.headers.map((h) => <th key={h}>{h}</th>)}</tr>
-                      </thead>
-                      <tbody>
-                        {ex.sampleTable.rows.map((row, i) => (
-                          <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <table className="result wrap w-full table-fixed">
+                    <thead>
+                      <tr>{ex.sampleTable.headers.map((h) => <th key={h}>{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {ex.sampleTable.rows.map((row, i) => (
+                        <tr key={i}>{row.map((c, j) => <td key={j}>{c}</td>)}</tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
