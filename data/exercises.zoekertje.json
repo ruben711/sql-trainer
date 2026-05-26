@@ -343,7 +343,7 @@
 
   {
     "id": "s7-01",
-    "chapter": "H4.8 CASE",
+    "chapter": "H4.8 Conditionele expressies",
     "title": "Prijsklasse",
     "difficulty": "medium",
     "tags": ["case"],
@@ -353,13 +353,98 @@
   },
   {
     "id": "s7-02",
-    "chapter": "H4.8 CASE",
+    "chapter": "H4.8 Conditionele expressies",
     "title": "Leveringsopties",
     "difficulty": "easy",
     "tags": ["case"],
     "prompt": "Toon voor elk zoekertje de titel en welke leveringsopties er zijn: 'verzenden + ophalen', 'enkel verzenden', 'enkel ophalen' of 'geen'.",
     "solution": "SELECT titel, CASE WHEN verzenden = 1 AND ophalen = 1 THEN 'verzenden + ophalen' WHEN verzenden = 1 THEN 'enkel verzenden' WHEN ophalen = 1 THEN 'enkel ophalen' ELSE 'geen' END FROM Zoekertje;",
     "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s7-03",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "COALESCE — vervang NULL door tekst",
+    "difficulty": "easy",
+    "tags": ["coalesce", "null"],
+    "prompt": "Toon voor elke gebruiker de gebruikersnaam en het telefoonnummer. Wanneer er geen telefoonnummer is, toon 'geen telefoon' in plaats van NULL.",
+    "solution": "SELECT gebruikersnaam, COALESCE(telefoon, 'geen telefoon') FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s7-04",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "COALESCE — ketting van drie waarden",
+    "difficulty": "medium",
+    "tags": ["coalesce", "null"],
+    "prompt": "Toon voor elk zoekertje de titel en een 'effectieve_prijs': neem de prijs als die ingevuld is, anders biedenvanaf, anders 0.",
+    "solution": "SELECT titel, COALESCE(prijs, biedenvanaf, 0) FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s7-05",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "NULLIF — zet lege string naar NULL",
+    "difficulty": "easy",
+    "tags": ["nullif", "null"],
+    "prompt": "Toon voor elke gebruiker de gebruikersnaam en het geslacht, maar als het geslacht een lege string is, toon dan NULL.",
+    "solution": "SELECT gebruikersnaam, NULLIF(geslacht, '') FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s7-06",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "NULLIF — vermijd deling door nul",
+    "difficulty": "medium",
+    "tags": ["nullif", "division"],
+    "prompt": "Toon voor elk zoekertje de titel en de prijs per breedte (prijs / breedte). Wanneer breedte 0 is moet het resultaat NULL zijn in plaats van een fout. Gebruik NULLIF.",
+    "solution": "SELECT titel, prijs / NULLIF(breedte, 0) FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"],
+    "hints": ["`NULLIF(a, b)` geeft NULL terug wanneer a gelijk is aan b — daardoor wordt de deling NULL i.p.v. een 'divide by zero'."]
+  },
+  {
+    "id": "s7-07",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "GREATEST — grootste van twee kolommen",
+    "difficulty": "medium",
+    "tags": ["greatest"],
+    "prompt": "Toon voor elk zoekertje met biedingen toegestaan: de titel en de hoogste van prijs of biedenvanaf. In PostgreSQL gebruik je GREATEST(prijs, biedenvanaf); in deze SQLite-omgeving werkt MAX(prijs, biedenvanaf) als scalar.",
+    "solution": "SELECT titel, MAX(prijs, biedenvanaf) FROM Zoekertje WHERE biedenok = 1;",
+    "relatedTables": ["Zoekertje"],
+    "hints": ["Examen-versie (PG): `GREATEST(prijs, biedenvanaf)`.", "Deze trainer draait op SQLite waar `MAX(a, b)` ook als scalar werkt."]
+  },
+  {
+    "id": "s7-08",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "LEAST — kleinste afmeting",
+    "difficulty": "medium",
+    "tags": ["least"],
+    "prompt": "Toon voor elk meubelzoekertje met afmetingen (breedte, hoogte en diepte allemaal niet NULL): de titel en de kleinste afmeting van de drie. In PostgreSQL: LEAST(...); hier in SQLite: MIN(...) als scalar.",
+    "solution": "SELECT titel, MIN(breedte, hoogte, diepte) FROM Zoekertje WHERE breedte IS NOT NULL AND hoogte IS NOT NULL AND diepte IS NOT NULL;",
+    "relatedTables": ["Zoekertje"],
+    "hints": ["Examen-versie (PG): `LEAST(breedte, hoogte, diepte)`.", "In SQLite werkt `MIN(a, b, c)` ook als scalar — let op: niet te verwarren met de aggregate `MIN()`."]
+  },
+  {
+    "id": "s7-09",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "COALESCE + NULLIF gecombineerd",
+    "difficulty": "hard",
+    "tags": ["coalesce", "nullif"],
+    "prompt": "Toon voor elke gebruiker de gebruikersnaam en een 'contact'-kolom: gebruik telefoon, behalve als die NULL of een lege string is — in dat geval gebruik het emailadres.",
+    "solution": "SELECT gebruikersnaam, COALESCE(NULLIF(telefoon, ''), emailadres) FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"],
+    "hints": ["`NULLIF(telefoon, '')` zet een lege string om naar NULL.", "Daarna pakt `COALESCE(..., emailadres)` de eerste niet-NULL waarde."]
+  },
+  {
+    "id": "s7-10",
+    "chapter": "H4.8 Conditionele expressies",
+    "title": "CASE vs COALESCE",
+    "difficulty": "medium",
+    "tags": ["case", "coalesce"],
+    "prompt": "Toon voor elk zoekertje de titel en de status van de prijs: 'prijs ingevuld' als prijs niet NULL is, 'geen prijs' als prijs NULL is. Schrijf dit met een CASE-expressie.",
+    "solution": "SELECT titel, CASE WHEN prijs IS NULL THEN 'geen prijs' ELSE 'prijs ingevuld' END FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"],
+    "hints": ["Dit kan ook in één keer met `COALESCE(CAST(prijs AS TEXT), 'geen prijs')`, maar de opgave vraagt expliciet CASE."]
   },
 
   {
@@ -747,5 +832,340 @@
     "solution": "CREATE VIEW HoogsteBiedingen AS SELECT z.zoekertjeID, z.titel, MAX(b.bod) AS hoogste FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel; SELECT * FROM HoogsteBiedingen ORDER BY hoogste DESC;",
     "orderMatters": true,
     "relatedTables": ["Zoekertje", "Bod"]
+  },
+
+  {
+    "id": "s1-07",
+    "chapter": "H4.1-2 Basic SELECT",
+    "title": "Sorteren op meerdere kolommen",
+    "difficulty": "easy",
+    "tags": ["order-by"],
+    "prompt": "Toon van elke gebruiker de plaats en gebruikersnaam, gesorteerd op plaats (alfabetisch) en daarbinnen op gebruikersnaam (alfabetisch).",
+    "solution": "SELECT plaats, gebruikersnaam FROM Gebruiker ORDER BY plaats, gebruikersnaam;",
+    "orderMatters": true,
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s1-08",
+    "chapter": "H4.1-2 Basic SELECT",
+    "title": "Unieke plaats + postcode",
+    "difficulty": "easy",
+    "tags": ["distinct"],
+    "prompt": "Toon alle unieke combinaties van plaats en postcode waar gebruikers wonen.",
+    "solution": "SELECT DISTINCT plaats, postcode FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s1-09",
+    "chapter": "H4.1-2 Basic SELECT",
+    "title": "Berekende kolom",
+    "difficulty": "easy",
+    "tags": ["select", "expression"],
+    "prompt": "Toon voor elk zoekertje met een prijs: de titel en de prijs inclusief 21% btw (prijs * 1.21).",
+    "solution": "SELECT titel, prijs * 1.21 FROM Zoekertje WHERE prijs IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s1-10",
+    "chapter": "H4.1-2 Basic SELECT",
+    "title": "LIMIT + OFFSET",
+    "difficulty": "easy",
+    "tags": ["limit", "offset"],
+    "prompt": "Toon de zoekertje-IDs en titels van de 3 oudste zoekertjes (laagste zoekertjeID), maar sla het allereerste over. Resultaat moet dus 3 rijen tellen.",
+    "solution": "SELECT zoekertjeID, titel FROM Zoekertje ORDER BY zoekertjeID LIMIT 3 OFFSET 1;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s2-08",
+    "chapter": "H4.3 Operatoren",
+    "title": "NOT IN",
+    "difficulty": "easy",
+    "tags": ["not-in"],
+    "prompt": "Toon de gebruikers die NIET in Gent of Antwerpen wonen.",
+    "solution": "SELECT * FROM Gebruiker WHERE plaats NOT IN ('Gent', 'Antwerpen');",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s2-09",
+    "chapter": "H4.3 Operatoren",
+    "title": "LIKE — begin met letter",
+    "difficulty": "easy",
+    "tags": ["like"],
+    "prompt": "Toon alle zoekertjes waarvan de titel begint met de letter 'V' (hoofdletter).",
+    "solution": "SELECT * FROM Zoekertje WHERE titel LIKE 'V%';",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s2-10",
+    "chapter": "H4.3 Operatoren",
+    "title": "LIKE — wildcard op één teken",
+    "difficulty": "medium",
+    "tags": ["like"],
+    "prompt": "Toon de gebruikers waarvan de postcode begint met 9 en in totaal 4 cijfers heeft. Gebruik de `_` wildcard voor één teken.",
+    "solution": "SELECT * FROM Gebruiker WHERE postcode LIKE '9___';",
+    "relatedTables": ["Gebruiker"],
+    "hints": ["`_` matcht exact één teken; `%` matcht nul of meer tekens."]
+  },
+  {
+    "id": "s2-11",
+    "chapter": "H4.3 Operatoren",
+    "title": "NOT BETWEEN",
+    "difficulty": "easy",
+    "tags": ["between", "not"],
+    "prompt": "Toon de titel en prijs van zoekertjes waarvan de prijs NIET tussen 50 en 200 euro ligt (en die wel een prijs hebben).",
+    "solution": "SELECT titel, prijs FROM Zoekertje WHERE prijs IS NOT NULL AND prijs NOT BETWEEN 50 AND 200;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s2-12",
+    "chapter": "H4.3 Operatoren",
+    "title": "Combinatie NULL + waarde",
+    "difficulty": "medium",
+    "tags": ["null", "or"],
+    "prompt": "Toon de titel en prijs van zoekertjes die ofwel geen prijs hebben, ofwel een prijs hoger dan 500 euro.",
+    "solution": "SELECT titel, prijs FROM Zoekertje WHERE prijs IS NULL OR prijs > 500;",
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s3-08",
+    "chapter": "H4.4 Joins",
+    "title": "Alle gebruikers + zoekertjes (LEFT)",
+    "difficulty": "medium",
+    "tags": ["join", "left"],
+    "prompt": "Toon voor elke gebruiker zijn/haar gebruikersnaam en de titel van elk zoekertje. Ook gebruikers zonder zoekertje moeten verschijnen (met NULL voor titel).",
+    "solution": "SELECT g.gebruikersnaam, z.titel FROM Gebruiker g LEFT JOIN Zoekertje z ON z.gebruikersnaam = g.gebruikersnaam;",
+    "relatedTables": ["Gebruiker", "Zoekertje"]
+  },
+  {
+    "id": "s3-09",
+    "chapter": "H4.4 Joins",
+    "title": "Zoekertje + prijstype",
+    "difficulty": "easy",
+    "tags": ["join"],
+    "prompt": "Toon voor elk zoekertje met een prijstype: de titel en de omschrijving van het prijstype.",
+    "solution": "SELECT z.titel, p.omschrijving FROM Zoekertje z JOIN Prijstype p ON p.ID = z.prijstypeID;",
+    "relatedTables": ["Zoekertje", "Prijstype"]
+  },
+  {
+    "id": "s3-10",
+    "chapter": "H4.4 Joins",
+    "title": "Drie-weg join: bod + bieder + zoekertje-eigenaar",
+    "difficulty": "hard",
+    "tags": ["join", "multi"],
+    "prompt": "Toon voor elk bod: het bedrag, de gebruikersnaam van de bieder, de titel van het zoekertje, en de gebruikersnaam van de verkoper.",
+    "solution": "SELECT b.bod, b.gebruikersnaam, z.titel, z.gebruikersnaam FROM Bod b JOIN Zoekertje z ON z.zoekertjeID = b.zoekertjeID;",
+    "relatedTables": ["Bod", "Zoekertje"]
+  },
+  {
+    "id": "s3-11",
+    "chapter": "H4.4 Joins",
+    "title": "Zoekertjes met materiaal 'Hout'",
+    "difficulty": "medium",
+    "tags": ["join", "m2n", "where"],
+    "prompt": "Toon de titels van alle zoekertjes die als materiaal 'Hout' hebben.",
+    "solution": "SELECT z.titel FROM Zoekertje z JOIN Materiaal_Zoekertje mz ON mz.zoekertjeID = z.zoekertjeID JOIN Materiaal m ON m.ID = mz.materiaalID WHERE m.materiaal = 'Hout';",
+    "relatedTables": ["Zoekertje", "Materiaal_Zoekertje", "Materiaal"]
+  },
+
+  {
+    "id": "s4-05",
+    "chapter": "H4.5 Functies",
+    "title": "Tekst samenvoegen",
+    "difficulty": "easy",
+    "tags": ["string", "concat"],
+    "prompt": "Toon voor elke gebruiker één kolom met de tekst 'gebruikersnaam uit plaats' (bv. 'annvds uit Gent'). Gebruik de `||` operator voor concatenatie.",
+    "solution": "SELECT gebruikersnaam || ' uit ' || plaats FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"],
+    "hints": ["In PostgreSQL en SQLite werkt `||` voor stringconcatenatie. In MySQL zou je `CONCAT()` gebruiken."]
+  },
+  {
+    "id": "s4-06",
+    "chapter": "H4.5 Functies",
+    "title": "SUBSTR — eerste 20 tekens",
+    "difficulty": "easy",
+    "tags": ["string", "substr"],
+    "prompt": "Toon voor elk zoekertje de titel en de eerste 20 tekens van de beschrijving.",
+    "solution": "SELECT titel, SUBSTR(beschrijving, 1, 20) FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s4-07",
+    "chapter": "H4.5 Functies",
+    "title": "REPLACE — vervang tekst",
+    "difficulty": "easy",
+    "tags": ["string", "replace"],
+    "prompt": "Toon de titel van elk zoekertje, maar vervang elke spatie door een liggend streepje '-'.",
+    "solution": "SELECT REPLACE(titel, ' ', '-') FROM Zoekertje;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s4-08",
+    "chapter": "H4.5 Functies",
+    "title": "Hoofdletter-ongevoelig zoeken",
+    "difficulty": "medium",
+    "tags": ["lower", "like"],
+    "prompt": "Toon alle zoekertjes waarvan de titel het woord 'TAFEL' bevat, ongeacht hoofd-/kleine letters. Gebruik LOWER + LIKE.",
+    "solution": "SELECT * FROM Zoekertje WHERE LOWER(titel) LIKE '%tafel%';",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s4-09",
+    "chapter": "H4.5 Functies",
+    "title": "Jaar uit datum",
+    "difficulty": "medium",
+    "tags": ["date", "substr"],
+    "prompt": "Toon voor elke gebruiker de gebruikersnaam en het jaar waarin hij/zij lid werd (afgeleid uit lidsinds 'YYYY-MM-DD'). In PostgreSQL: `EXTRACT(YEAR FROM lidsinds)`; in deze SQLite-omgeving: `SUBSTR(lidsinds, 1, 4)`.",
+    "solution": "SELECT gebruikersnaam, SUBSTR(lidsinds, 1, 4) FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"],
+    "hints": ["Examen-versie (PG): `EXTRACT(YEAR FROM lidsinds)` of `TO_CHAR(lidsinds, 'YYYY')`.", "In deze trainer is lidsinds een TEXT, dus `SUBSTR` werkt."]
+  },
+  {
+    "id": "s4-10",
+    "chapter": "H4.5 Functies",
+    "title": "ABS — absoluut verschil",
+    "difficulty": "medium",
+    "tags": ["numeric", "abs"],
+    "prompt": "Toon voor elk zoekertje met zowel prijs als biedenvanaf ingevuld: de titel en het absolute verschil tussen prijs en biedenvanaf.",
+    "solution": "SELECT titel, ABS(prijs - biedenvanaf) FROM Zoekertje WHERE prijs IS NOT NULL AND biedenvanaf IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s5-07",
+    "chapter": "H4.6 Aggregatie",
+    "title": "SUM van alle prijzen",
+    "difficulty": "easy",
+    "tags": ["sum"],
+    "prompt": "Wat is de som van alle prijzen van zoekertjes met een prijs?",
+    "solution": "SELECT SUM(prijs) FROM Zoekertje WHERE prijs IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s5-08",
+    "chapter": "H4.6 Aggregatie",
+    "title": "COUNT DISTINCT",
+    "difficulty": "medium",
+    "tags": ["count", "distinct"],
+    "prompt": "Hoeveel verschillende plaatsen wonen er gebruikers in?",
+    "solution": "SELECT COUNT(DISTINCT plaats) FROM Gebruiker;",
+    "relatedTables": ["Gebruiker"]
+  },
+  {
+    "id": "s5-09",
+    "chapter": "H4.6 Aggregatie",
+    "title": "MIN, MAX en AVG in één query",
+    "difficulty": "medium",
+    "tags": ["min", "max", "avg"],
+    "prompt": "Toon op één rij de minimum, maximum en gemiddelde prijs van alle zoekertjes met een prijs.",
+    "solution": "SELECT MIN(prijs), MAX(prijs), AVG(prijs) FROM Zoekertje WHERE prijs IS NOT NULL;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s5-10",
+    "chapter": "H4.6 Aggregatie",
+    "title": "Aantal zoekertjes per categorie",
+    "difficulty": "medium",
+    "tags": ["group-by", "join"],
+    "prompt": "Toon per categorie (met de omschrijving) het aantal zoekertjes in die categorie. Sorteer aflopend op aantal.",
+    "solution": "SELECT c.omschrijving, COUNT(*) FROM Categorie c JOIN Zoekertje z ON z.categorieID = c.ID GROUP BY c.ID, c.omschrijving ORDER BY COUNT(*) DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Categorie", "Zoekertje"]
+  },
+  {
+    "id": "s5-11",
+    "chapter": "H4.6 Aggregatie",
+    "title": "HAVING met AVG",
+    "difficulty": "hard",
+    "tags": ["group-by", "having", "avg"],
+    "prompt": "Welke gebruikers hebben een gemiddelde zoekertje-prijs van meer dan 100 euro? Toon de gebruikersnaam en het gemiddelde.",
+    "solution": "SELECT gebruikersnaam, AVG(prijs) FROM Zoekertje WHERE prijs IS NOT NULL GROUP BY gebruikersnaam HAVING AVG(prijs) > 100;",
+    "relatedTables": ["Zoekertje"]
+  },
+
+  {
+    "id": "s6-04",
+    "chapter": "H4.7 Verzamelingen",
+    "title": "UNION ALL",
+    "difficulty": "medium",
+    "tags": ["union-all"],
+    "prompt": "Toon alle plaatsen waar gebruikers wonen én alle plaatsen waar zoekertje-eigenaars wonen, MET duplicaten (UNION ALL).",
+    "solution": "SELECT plaats FROM Gebruiker UNION ALL SELECT g.plaats FROM Gebruiker g JOIN Zoekertje z ON z.gebruikersnaam = g.gebruikersnaam;",
+    "relatedTables": ["Gebruiker", "Zoekertje"]
+  },
+  {
+    "id": "s6-05",
+    "chapter": "H4.7 Verzamelingen",
+    "title": "UNION met type-tag",
+    "difficulty": "medium",
+    "tags": ["union", "case"],
+    "prompt": "Toon één lijst met twee kolommen: de naam (gebruikersnaam of titel) en het type ('gebruiker' of 'zoekertje'). Combineer met UNION.",
+    "solution": "SELECT gebruikersnaam, 'gebruiker' FROM Gebruiker UNION SELECT titel, 'zoekertje' FROM Zoekertje;",
+    "relatedTables": ["Gebruiker", "Zoekertje"]
+  },
+  {
+    "id": "s6-06",
+    "chapter": "H4.7 Verzamelingen",
+    "title": "EXCEPT — categorieën zonder zoekertje",
+    "difficulty": "medium",
+    "tags": ["except"],
+    "prompt": "Toon de ID's van categorieën waar nog géén zoekertje in zit. Gebruik EXCEPT.",
+    "solution": "SELECT ID FROM Categorie EXCEPT SELECT categorieID FROM Zoekertje;",
+    "relatedTables": ["Categorie", "Zoekertje"]
+  },
+
+  {
+    "id": "s8-07",
+    "chapter": "H4.9 Subqueries",
+    "title": "Subquery in FROM (afgeleide tabel)",
+    "difficulty": "hard",
+    "tags": ["subquery", "from"],
+    "prompt": "Toon de gemiddelde 'aantal zoekertjes per gebruiker'. Bereken eerst per gebruiker hoeveel zoekertjes hij/zij heeft, en neem dan het gemiddelde van die aantallen. Gebruik een subquery in de FROM.",
+    "solution": "SELECT AVG(aantal) FROM (SELECT COUNT(*) AS aantal FROM Zoekertje GROUP BY gebruikersnaam) AS per_gebruiker;",
+    "relatedTables": ["Zoekertje"]
+  },
+  {
+    "id": "s8-08",
+    "chapter": "H4.9 Subqueries",
+    "title": "Scalar subquery in SELECT",
+    "difficulty": "hard",
+    "tags": ["subquery", "scalar"],
+    "prompt": "Toon voor elk zoekertje de titel, de prijs, en het aantal biedingen op dat zoekertje (als scalar-subquery in de SELECT-clausule).",
+    "solution": "SELECT z.titel, z.prijs, (SELECT COUNT(*) FROM Bod b WHERE b.zoekertjeID = z.zoekertjeID) FROM Zoekertje z;",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+  {
+    "id": "s8-09",
+    "chapter": "H4.9 Subqueries",
+    "title": "Het zoekertje met het meeste biedingen",
+    "difficulty": "hard",
+    "tags": ["subquery", "max", "group-by"],
+    "prompt": "Toon de titel van het zoekertje waarop het meeste biedingen werden uitgebracht.",
+    "solution": "SELECT z.titel FROM Zoekertje z JOIN Bod b ON b.zoekertjeID = z.zoekertjeID GROUP BY z.zoekertjeID, z.titel HAVING COUNT(*) = (SELECT MAX(c) FROM (SELECT COUNT(*) AS c FROM Bod GROUP BY zoekertjeID));",
+    "relatedTables": ["Zoekertje", "Bod"]
+  },
+
+  {
+    "id": "v1-02",
+    "chapter": "Reeks 8 Views",
+    "title": "View ZoekertjeFull (join)",
+    "difficulty": "medium",
+    "tags": ["view", "join"],
+    "prompt": "Maak een view ZoekertjeFull die per zoekertje toont: zoekertjeID, titel, prijs, gebruikersnaam van de verkoper en de plaats van de verkoper. Selecteer daarna alle rijen waarvan de plaats 'Gent' is.",
+    "solution": "CREATE VIEW ZoekertjeFull AS SELECT z.zoekertjeID, z.titel, z.prijs, g.gebruikersnaam, g.plaats FROM Zoekertje z JOIN Gebruiker g ON g.gebruikersnaam = z.gebruikersnaam; SELECT * FROM ZoekertjeFull WHERE plaats = 'Gent';",
+    "relatedTables": ["Zoekertje", "Gebruiker"]
+  },
+  {
+    "id": "v1-03",
+    "chapter": "Reeks 8 Views",
+    "title": "DROP + CREATE VIEW",
+    "difficulty": "medium",
+    "tags": ["view", "drop"],
+    "prompt": "Verwijder eerst de view DureZoekertjes als die bestaat, en maak ze daarna opnieuw aan. De view toont titel en prijs van zoekertjes met prijs >= 200, gesorteerd op prijs aflopend. Selecteer daarna alle rijen uit de view.",
+    "solution": "DROP VIEW IF EXISTS DureZoekertjes; CREATE VIEW DureZoekertjes AS SELECT titel, prijs FROM Zoekertje WHERE prijs >= 200; SELECT * FROM DureZoekertjes ORDER BY prijs DESC;",
+    "orderMatters": true,
+    "relatedTables": ["Zoekertje"]
   }
 ]
