@@ -10,6 +10,7 @@ const MAX_ENTRIES = 500;
 const MAX_NAME_LEN = 24;
 
 type ModeStats = { xp: number; solved: number };
+type CustomTag = { label: string; color: string; emoji?: string };
 type Entry = {
   uid: string;
   name: string;
@@ -17,6 +18,7 @@ type Entry = {
   general: ModeStats;
   updatedAt: number;
   admin?: boolean;
+  customTag?: CustomTag | null;
 };
 
 function sanitizeName(s: string): string {
@@ -24,6 +26,18 @@ function sanitizeName(s: string): string {
     .replace(/[<>]/g, "")
     .trim()
     .slice(0, MAX_NAME_LEN) || "Anoniem";
+}
+
+function sanitizeTag(t: any): CustomTag | null {
+  if (!t) return null;
+  const label = String(t.label || "").replace(/[<>]/g, "").trim().slice(0, 16);
+  if (!label) return null;
+  // Hex kleur valideren (#fff of #ffffff)
+  const colorRaw = String(t.color || "#3b82f6").trim();
+  const color = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(colorRaw) ? colorRaw : "#3b82f6";
+  // Emoji: max 4 code units (volstaat voor 1-2 emoji's incl. ZWJ-sequenties beperkt)
+  const emoji = String(t.emoji || "").trim().slice(0, 8) || undefined;
+  return { label, color, emoji };
 }
 
 function clampStats(o: any): ModeStats {
@@ -116,6 +130,10 @@ export async function PATCH(req: NextRequest) {
     exam: body.exam !== undefined ? clampStats(body.exam) : cur.exam,
     general: body.general !== undefined ? clampStats(body.general) : cur.general,
     admin: body.admin !== undefined ? Boolean(body.admin) : cur.admin,
+    customTag:
+      body.customTag === null ? null :
+      body.customTag !== undefined ? sanitizeTag(body.customTag) :
+      cur.customTag,
     updatedAt: Date.now(),
   };
   await setJson(KEY, list);

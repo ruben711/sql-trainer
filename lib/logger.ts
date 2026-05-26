@@ -1,4 +1,5 @@
 "use client";
+import { useIdentity } from "./identity";
 
 const SESSION_KEY = "sql-trainer-session";
 const VISITED_KEY = "sql-trainer-visited";
@@ -24,14 +25,19 @@ type Event =
 
 export function track(event: Event, data?: Record<string, any>) {
   if (typeof window === "undefined") return;
-  const payload = JSON.stringify({ event, sessionId: getSessionId(), data });
-  // Bij voorkeur sendBeacon (vuurt ook bij page-unload, blocking-free)
+  const id = useIdentity.getState();
+  const payload = JSON.stringify({
+    event,
+    sessionId: getSessionId(),
+    uid: id.uid || null,
+    name: id.name || null,
+    data,
+  });
   if (navigator.sendBeacon) {
     const blob = new Blob([payload], { type: "application/json" });
     navigator.sendBeacon("/api/log", blob);
     return;
   }
-  // Fallback
   fetch("/api/log", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -40,7 +46,6 @@ export function track(event: Event, data?: Record<string, any>) {
   }).catch(() => {});
 }
 
-/** Eenmalige visitor-log per browser per ~24u (lichte deduplicatie). */
 export function trackVisitorOnce() {
   if (typeof window === "undefined") return;
   const last = Number(localStorage.getItem(VISITED_KEY) || 0);

@@ -25,6 +25,23 @@ export async function getJson<T = any>(key: string): Promise<T | null> {
   try { return JSON.parse(v) as T; } catch { return null; }
 }
 
+export async function mgetJson<T = any>(keys: string[]): Promise<(T | null)[]> {
+  if (keys.length === 0) return [];
+  if (!URL || !TOKEN) throw new Error("Upstash niet geconfigureerd");
+  const path = ["MGET", ...keys].map((a) => encodeURIComponent(String(a))).join("/");
+  const res = await fetch(`${URL}/${path}`, {
+    headers: { Authorization: `Bearer ${TOKEN}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Upstash MGET ${res.status}: ${await res.text()}`);
+  const json = await res.json();
+  const arr = (json.result as (string | null)[]) || [];
+  return arr.map((v) => {
+    if (!v) return null;
+    try { return JSON.parse(v) as T; } catch { return null; }
+  });
+}
+
 export async function setJson(key: string, value: any): Promise<void> {
   // Upstash REST API: POST-body voor lange waarden
   if (!URL || !TOKEN) throw new Error("Upstash niet geconfigureerd");

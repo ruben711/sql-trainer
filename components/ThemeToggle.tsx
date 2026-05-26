@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useTheme, type Theme } from "@/lib/theme";
+import { useMounted } from "@/lib/useMounted";
 
 const options: { v: Theme; label: string; icon: string }[] = [
   { v: "light", label: "Licht", icon: "☀" },
@@ -9,9 +10,11 @@ const options: { v: Theme; label: string; icon: string }[] = [
 ];
 
 export default function ThemeToggle() {
+  const mounted = useMounted();
   const theme = useTheme((s) => s.theme);
   const setTheme = useTheme((s) => s.setTheme);
   const apply = useTheme((s) => s.apply);
+  const activeTheme = mounted ? theme : "system";
 
   useEffect(() => {
     apply();
@@ -28,7 +31,7 @@ export default function ThemeToggle() {
           key={o.v}
           onClick={() => setTheme(o.v)}
           className={`px-2 h-full text-2xs inline-flex items-center gap-1 transition-colors ${
-            theme === o.v ? "bg-hover text-fg" : "text-fg-muted hover:text-fg hover:bg-hover"
+            activeTheme === o.v ? "bg-hover text-fg" : "text-fg-muted hover:text-fg hover:bg-hover"
           }`}
           title={`Thema: ${o.label}`}
         >

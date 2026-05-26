@@ -7,6 +7,7 @@ import NavTabs from "@/components/NavTabs";
 import ModeSwitch from "@/components/ModeSwitch";
 import ThemeToggle from "@/components/ThemeToggle";
 import ModeProvider from "@/components/ModeProvider";
+import NotificationBell from "@/components/NotificationBell";
 
 export const metadata: Metadata = {
   title: "SQL Trainer — Examen Voorbereiding",
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <span className="hidden md:flex items-center gap-2 text-2xs text-fg-dim font-mono">
                   <span><span className="kbd">Ctrl</span>+<span className="kbd">↵</span> uitvoeren</span>
                 </span>
+                <NotificationBell />
                 <ThemeToggle />
               </div>
             </header>

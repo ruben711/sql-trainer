@@ -19,6 +19,8 @@ const diffLabel = { easy: "Makkelijk", medium: "Gemiddeld", hard: "Moeilijk" } a
 export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exercise; onSolved?: () => void }) {
   const mode = useMode((s) => s.mode);
   const record = useProgress((s) => s.recordAttempt);
+  const getSavedQuery = useProgress((s) => s.getSavedQuery);
+  const solvedMap = useProgress((s) => s.byMode[mode].solved);
   const setHighlight = useHighlight((s) => s.set);
   const [sql, setSql] = useState("");
   const [studentResult, setStudentResult] = useState<QueryResult | null>(null);
@@ -28,7 +30,15 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setSql("");
+    // Start-inhoud van de editor:
+    //  1) saved query (laatste ingediende poging — correct of fout)
+    //  2) anders, als oefening al opgelost was vóór dit opslaan-systeem: de modeloplossing (mooi geformatteerd)
+    //  3) anders: leeg
+    const saved = getSavedQuery(mode, exercise.id);
+    const wasSolved = !!solvedMap[exercise.id];
+    if (saved) setSql(saved);
+    else if (wasSolved) setSql(formatSql(exercise.solution));
+    else setSql("");
     setStudentResult(null);
     setGrading(null);
     setAttempts(0);
@@ -36,6 +46,7 @@ export default function ExerciseRunner({ exercise, onSolved }: { exercise: Exerc
     setHighlight(exercise.relatedTables ?? []);
     track("exercise_view", { id: exercise.id, mode, chapter: exercise.chapter, difficulty: exercise.difficulty });
     return () => setHighlight([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exercise.id]);
 
   async function check() {

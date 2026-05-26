@@ -4,6 +4,7 @@ import { useIdentity } from "@/lib/identity";
 import { useProgress } from "@/lib/store";
 import { useMode, MODES } from "@/lib/modes";
 import { useAdmin } from "@/lib/adminClient";
+import CustomTag from "@/components/CustomTag";
 import clsx from "clsx";
 
 type ModeKey = "exam" | "general";
@@ -14,6 +15,7 @@ type Entry = {
   general: { xp: number; solved: number };
   updatedAt: number;
   admin?: boolean;
+  customTag?: { label: string; color: string; emoji?: string } | null;
 };
 
 function levelOf(xp: number) {
@@ -215,9 +217,10 @@ export default function LeaderboardPage() {
                       {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
                     </td>
                     <td className={clsx("str", me && "font-bold")}>
-                      <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 flex-wrap">
                         {e.name}
                         {e.admin && <span className="admin-tag">👑 ADMIN</span>}
+                        {e.customTag && <CustomTag tag={e.customTag} />}
                         {me && <span className="chip">jij</span>}
                       </span>
                     </td>
