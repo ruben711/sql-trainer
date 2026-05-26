@@ -16,6 +16,12 @@
  *   EXTRACT(YEAR FROM expr)        → CAST(strftime('%Y', expr) AS INTEGER)
  *   EXTRACT(MONTH/DAY/HOUR/...)    → idem met juiste format-string
  *   NOW()                          → CURRENT_TIMESTAMP          (SQLite-equivalent)
+ *   x > ALL (SELECT v FROM t)      → x > (SELECT MAX(v) FROM t)
+ *   x < ALL (...)                  → x < (SELECT MIN(...) ...)
+ *   x > ANY (...)                  → x > (SELECT MIN(...) ...)
+ *   x < ANY (...)                  → x < (SELECT MAX(...) ...)
+ *   x = ANY (subq)                 → x IN (subq)
+ *   x <> ALL (subq)                → x NOT IN (subq)
  *
  * Niet vertaald (te complex / weinig gebruikt op examen):
  *   AGE(a, b)                      → laat staan; SQLite kent dit niet
@@ -65,7 +71,28 @@ export function pgToSqlite(sql: string): string {
     }
   );
 
-  // 3. Eenvoudige keyword-substituties
+  // 3. ALL / ANY / SOME quantifiers — vertaal naar MAX/MIN/IN/NOT IN
+  //    Werkt voor "flat" subqueries (geen nested parens in de subquery).
+  s = s.replace(
+    /(>=|<=|<>|!=|>|<|=)\s*ALL\s*\(\s*SELECT\s+(.+?)\s+FROM\s+([^)]+?)\)/gi,
+    (m, op: string, col: string, rest: string) => {
+      if (op === "<>" || op === "!=") return `NOT IN (SELECT ${col.trim()} FROM ${rest})`;
+      if (op === ">" || op === ">=") return `${op} (SELECT MAX(${col.trim()}) FROM ${rest})`;
+      if (op === "<" || op === "<=") return `${op} (SELECT MIN(${col.trim()}) FROM ${rest})`;
+      return m; // = ALL niet eenvoudig vertaalbaar
+    }
+  );
+  s = s.replace(
+    /(>=|<=|<>|!=|>|<|=)\s*(?:ANY|SOME)\s*\(\s*SELECT\s+(.+?)\s+FROM\s+([^)]+?)\)/gi,
+    (m, op: string, col: string, rest: string) => {
+      if (op === "=") return `IN (SELECT ${col.trim()} FROM ${rest})`;
+      if (op === ">" || op === ">=") return `${op} (SELECT MIN(${col.trim()}) FROM ${rest})`;
+      if (op === "<" || op === "<=") return `${op} (SELECT MAX(${col.trim()}) FROM ${rest})`;
+      return m;
+    }
+  );
+
+  // 4. Eenvoudige keyword-substituties
   s = s.replace(/\bGREATEST\b/gi, "MAX");
   s = s.replace(/\bLEAST\b/gi, "MIN");
   s = s.replace(/\bSTRING_AGG\b/gi, "GROUP_CONCAT");
