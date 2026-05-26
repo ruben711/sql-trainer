@@ -58,7 +58,8 @@ export default function ExamPage() {
   const ss = (remaining % 60).toString().padStart(2, "0");
 
   function start() {
-    const qs = randomSample(mode, n);
+    // Geen insane-oefeningen in de examensimulatie — die zijn enkel voor tryhards.
+    const qs = randomSample(mode, n, { difficulties: ["easy", "medium", "hard"] });
     setQuestions(qs);
     setAnswers([]);
     setIdx(0);
